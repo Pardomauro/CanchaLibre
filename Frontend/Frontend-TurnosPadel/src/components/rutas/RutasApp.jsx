@@ -1,23 +1,33 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import ProtectedRoute from '../auth/ProtectedRoute';
-import Login from '../usuarios/login';
-import Registro from '../usuarios/registro';
-import AdminLogin from '../usuarios/admin-login';
-
-
 import Unauthorized from '../auth/Unauthorized';
-import AdminDashboard from '../admin/AdminDashboard';
-import HistorialReservas from '../reservas/HistorialReservas.jsx';
-import NuevaReservaUsuario from '../reservas/NuevaReservaUsuario.jsx';
-import ListaCanchas from '../canchas/lista.jsx';
-import DetalleCancha from '../canchas/detalle.jsx';
-import CrearEditarCancha from '../canchas/crear-editar.jsx';
-import GestionUsuarios from '../admin/GestionUsuarios.jsx';
-import NuevaReserva from '../admin/NuevaReserva.jsx';
-import RecuperarPassword from '../usuarios/RecuperarPassword.jsx';
-import RestablecerPassword from '../usuarios/RestablecerPassword.jsx';
-import Perfil from '../usuarios/perfil.jsx';
+
+// Páginas de usuario
+import Login from '../../pages/usuario/login';
+import Registro from '../../pages/usuario/registro';
+import RecuperarPassword from '../../pages/usuario/RecuperarPassword';
+import RestablecerPassword from '../../pages/usuario/RestablecerPassword';
+import Perfil from '../../pages/usuario/perfil';
+
+// Páginas de admin
+import AdminDashboard from '../../pages/admin/AdminDashboard';
+import GestionUsuarios from '../../pages/admin/GestionUsuarios';
+
+// Páginas de canchas
+import ListaCanchas from '../../pages/canchas/lista';
+import DetalleCancha from '../../pages/canchas/detalle';
+import CrearEditarCancha from '../../pages/canchas/crear-editar';
+
+// Páginas de reservas
+import HistorialReservas from '../../pages/reservas/HistorialReservas';
+import NuevaReserva from '../../pages/reservas/NuevaReserva';
+
+// Wrapper para extraer el parámetro id de la URL
+function NuevaReservaWrapper() {
+    const { id } = useParams();
+    return <NuevaReserva canchaId={id} redirectPath="/reservas/historial" />;
+}
 
 export default function RutasApp() {
     const { isAuthenticated, loading } = useAuth();
@@ -40,7 +50,6 @@ export default function RutasApp() {
             {/* Rutas Públicas */}
             <Route path="/login" element={<Login />} />
             <Route path="/registro" element={<Registro />} />
-            <Route path="/admin-login" element={<AdminLogin />} />
             <Route path="/recuperar-password" element={<RecuperarPassword />} />
             <Route path="/restablecer-password" element={<RestablecerPassword />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
@@ -80,7 +89,7 @@ export default function RutasApp() {
             } />
             <Route path="/admin/nueva-reserva" element={
                 <ProtectedRoute requireAdmin={true}>
-                    <NuevaReserva />
+                    <NuevaReserva isAdmin={true} redirectPath="/admin" />
                 </ProtectedRoute>
             } />
 
@@ -92,7 +101,7 @@ export default function RutasApp() {
             } />
             <Route path="/reservar/:id" element={
                 <ProtectedRoute>
-                    <NuevaReservaUsuario />
+                    <NuevaReservaWrapper />
                 </ProtectedRoute>
             } />
 

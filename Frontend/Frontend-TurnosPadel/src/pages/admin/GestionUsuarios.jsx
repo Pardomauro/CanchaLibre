@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { obtenerUsuarios, crearUsuario, eliminarUsuario } from '../../api/usuarios';
-import ConfirmDialog from '../accionesCriticas/ConfirmDialog';
+import ConfirmDialog from '../../components/accionesCriticas/ConfirmDialog';
 
 const GestionUsuarios = () => {
     const [usuarios, setUsuarios] = useState([]);

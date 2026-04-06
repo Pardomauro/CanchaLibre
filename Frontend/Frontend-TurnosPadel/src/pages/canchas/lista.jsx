@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { obtenerCanchas, eliminarCancha } from '../../api/canchas';
 import { useAuth } from '../../context/AuthContext';
-import ConfirmDialog from '../accionesCriticas/ConfirmDialog';
+import ConfirmDialog from '../../components/accionesCriticas/ConfirmDialog';
 
 // Función helper para manejar horarios de forma segura
 const getHorariosCount = (horarios) => {

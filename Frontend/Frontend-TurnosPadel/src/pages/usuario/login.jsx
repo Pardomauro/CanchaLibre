@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { loginUsuario } from '../../api/auth';
 import { useAuth } from '../../context/AuthContext';
 
 const Login = () => {
@@ -28,11 +27,8 @@ const Login = () => {
     setLoading(true);
 
     try {
-      console.log('🔍 Intentando login con:', { email: formData.email, password: '***' });
-      console.log('🔧 Función loginUsuario:', typeof loginUsuario);
       
-      // Hacer login manual primero para verificar
-      console.log('🧪 Probando fetch manual...');
+      // Hacer login manual para verificar
       const manualResponse = await fetch('http://localhost:3000/api/usuarios/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -43,16 +39,15 @@ const Login = () => {
       });
       
       const manualData = await manualResponse.json();
-      console.log('� Respuesta manual:', manualData);
       
       if (manualData.success) {
-        // Guardar manualmente en localStorage
+        // Guardar en localStorage
         localStorage.setItem('token', manualData.token);
         localStorage.setItem('userId', manualData.userId.toString());
         localStorage.setItem('userRole', manualData.role);
         
-        console.log('💾 Guardado manual en localStorage:', {
-          token: localStorage.getItem('token') ? 'Presente' : 'null',
+        console.log('💾 Guardado en localStorage:', {
+          token: 'Presente',
           userId: localStorage.getItem('userId'),
           userRole: localStorage.getItem('userRole')
         });
@@ -66,7 +61,7 @@ const Login = () => {
         
         console.log('✅ Login completado, redirigiendo...');
         
-        // Redirigimos según el rol
+        // Redirigir según el rol
         if (manualData.role === 'administrador') {
           console.log('📍 Redirigiendo a /admin');
           navigate('/admin');
@@ -203,12 +198,6 @@ const Login = () => {
                 ¿No tienes cuenta?{' '}
                 <Link to="/registro" className="font-medium text-green-600 hover:text-green-500 transition duration-200">
                   Regístrate aquí
-                </Link>
-              </p>
-              <p className="text-xs sm:text-sm text-gray-600">
-                ¿Eres administrador?{' '}
-                <Link to="/admin-login" className="font-medium text-purple-600 hover:text-purple-500 transition duration-200">
-                  Acceso Administrativo
                 </Link>
               </p>
             </div>

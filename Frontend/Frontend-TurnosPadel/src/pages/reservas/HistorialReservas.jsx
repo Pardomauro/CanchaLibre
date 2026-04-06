@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { obtenerReservasPorUsuario, obtenerReservas, eliminarReserva } from '../../api/reservas';
 import { useAuth } from '../../context/AuthContext';
-import ConfirmDialog from '../accionesCriticas/ConfirmDialog';
+import ConfirmDialog from '../../components/accionesCriticas/ConfirmDialog';
 
 const HistorialReservas = () => {
     const { user, isAdmin } = useAuth();

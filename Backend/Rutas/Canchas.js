@@ -130,31 +130,31 @@ router.get('/disponibles', async (req, res) => {
 
 // Ruta para verificar disponibilidad de canchas
 router.post('/turnos/disponibilidad', [
-  ...validacionesDisponibilidad,
-  validarCampos
+    ...validacionesDisponibilidad,
+    validarCampos
 ], async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errores: errors.array() });
-  }
-
-  const { fecha, horaInicio, horaFin, id_cancha } = req.body;
-
-  try {
-    const [resultados] = await pool.query(
-      `SELECT * FROM turnos WHERE id_cancha = ? AND fecha_turno BETWEEN ? AND ?`,
-      [id_cancha, `${fecha} ${horaInicio}`, `${fecha} ${horaFin}`]
-    );
-
-    if (resultados.length > 0) {
-      return res.status(200).json({ disponible: false, mensaje: 'La cancha no está disponible en el horario solicitado.' });
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errores: errors.array() });
     }
 
-    res.status(200).json({ disponible: true, mensaje: 'La cancha está disponible.' });
-  } catch (error) {
-    console.error('Error al verificar disponibilidad:', error);
-    res.status(500).json({ error: 'Error interno al verificar disponibilidad.' });
-  }
+    const { fecha, horaInicio, horaFin, id_cancha } = req.body;
+
+    try {
+        const [resultados] = await pool.query(
+            `SELECT * FROM turnos WHERE id_cancha = ? AND fecha_turno BETWEEN ? AND ?`,
+            [id_cancha, `${fecha} ${horaInicio}`, `${fecha} ${horaFin}`]
+        );
+
+        if (resultados.length > 0) {
+            return res.status(200).json({ disponible: false, mensaje: 'La cancha no está disponible en el horario solicitado.' });
+        }
+
+        res.status(200).json({ disponible: true, mensaje: 'La cancha está disponible.' });
+    } catch (error) {
+        console.error('Error al verificar disponibilidad:', error);
+        res.status(500).json({ error: 'Error interno al verificar disponibilidad.' });
+    }
 });
 
 
@@ -293,7 +293,7 @@ router.put('/:id', [
                     tipoRecibido: typeof en_mantenimiento
                 });
             }
-            
+
             console.log('🔄 Conversión de en_mantenimiento:', {
                 original: en_mantenimiento,
                 convertido: booleanValue,
@@ -311,7 +311,7 @@ router.put('/:id', [
                     tipoRecibido: typeof horarios_disponibles
                 });
             }
-            
+
             if (horarios_disponibles.length === 0) {
                 return res.status(400).json({
                     success: false,
@@ -334,10 +334,10 @@ router.put('/:id', [
 
         // Preparar valores para actualizar (usar valores actuales si no se proporcionan nuevos)
         const precioFinal = precio !== undefined ? precio : canchaActual.precio;
-        const mantenimientoFinal = en_mantenimiento !== undefined ? 
-            (typeof en_mantenimiento === 'boolean' ? en_mantenimiento : 
-             typeof en_mantenimiento === 'string' ? en_mantenimiento.toLowerCase() === 'true' :
-             typeof en_mantenimiento === 'number' ? en_mantenimiento === 1 : false) 
+        const mantenimientoFinal = en_mantenimiento !== undefined ?
+            (typeof en_mantenimiento === 'boolean' ? en_mantenimiento :
+                typeof en_mantenimiento === 'string' ? en_mantenimiento.toLowerCase() === 'true' :
+                    typeof en_mantenimiento === 'number' ? en_mantenimiento === 1 : false)
             : canchaActual.en_mantenimiento;
         const horariosFinal = horarios_disponibles !== undefined ? JSON.stringify(horarios_disponibles) : canchaActual.horarios_disponibles;
 
