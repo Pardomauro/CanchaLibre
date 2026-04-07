@@ -12,7 +12,7 @@ import ConfirmDialog from '../../components/accionesCriticas/ConfirmDialog';
  * @param {string} props.canchaId - ID de cancha preseleccionada (para modo usuario)
  * @param {string} props.redirectPath - Ruta de redirección después de crear
  */
-const NuevaReserva = ({ 
+const NuevaReserva = ({
     isAdmin = false,
     canchaId = null,
     redirectPath = null
@@ -28,10 +28,10 @@ const NuevaReserva = ({
     const [loadingCanchas, setLoadingCanchas] = useState(true);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
-    
+
     const [showConfirm, setShowConfirm] = useState(false);
     const [confirmData, setConfirmData] = useState(null);
-    
+
     const [formData, setFormData] = useState({
         id_cancha: canchaId || '',
         email_usuario: isAdmin ? '' : (user?.email || ''),
@@ -61,13 +61,13 @@ const NuevaReserva = ({
         try {
             setLoadingCanchas(true);
             const data = await obtenerCanchaPorId(canchaId);
-            
+
             if (data.en_mantenimiento) {
                 setError('Esta cancha no está disponible actualmente');
                 setLoadingCanchas(false);
                 return;
             }
-            
+
             setCanchaSeleccionada(data);
             setFormData(prev => ({
                 ...prev,
@@ -87,7 +87,7 @@ const NuevaReserva = ({
             setLoadingCanchas(true);
             const canchasData = await obtenerCanchas();
             setCanchas(Array.isArray(canchasData) ? canchasData : []);
-            
+
             if (formData.id_cancha && formData.fecha) {
                 cargarHorariosDisponibles();
             }
@@ -102,30 +102,30 @@ const NuevaReserva = ({
 
     const verificarSuperposicion = (horaInicio, duracionMin, reservasExistentes) => {
         if (!horaInicio || !duracionMin || !reservasExistentes.length) return false;
-        
+
         const [horasInicio, minutosInicio] = horaInicio.split(':').map(Number);
         const inicioEnMinutos = horasInicio * 60 + minutosInicio;
         const finEnMinutos = inicioEnMinutos + parseInt(duracionMin);
-        
+
         for (const reserva of reservasExistentes) {
             const [horasReserva, minutosReserva] = reserva.hora.split(':').map(Number);
             const inicioReservaMinutos = horasReserva * 60 + minutosReserva;
             const duracionReserva = reserva.duracion || 60;
             const finReservaMinutos = inicioReservaMinutos + duracionReserva;
-            
+
             const haySuperposicion = inicioEnMinutos < finReservaMinutos && finEnMinutos > inicioReservaMinutos;
-            
+
             if (haySuperposicion) {
                 return true;
             }
         }
-        
+
         return false;
     };
 
     const filtrarHorariosSinSuperposicion = (horariosDisponibles, duracion, reservasExistentes) => {
         if (!horariosDisponibles.length || !reservasExistentes.length) return horariosDisponibles;
-        
+
         return horariosDisponibles.filter(horario => {
             return !verificarSuperposicion(horario.hora, duracion, reservasExistentes);
         });
@@ -134,31 +134,31 @@ const NuevaReserva = ({
     const cargarHorariosDisponibles = async () => {
         try {
             const responseReservas = await obtenerHorariosDisponibles(
-                formData.id_cancha, 
-                formData.fecha, 
+                formData.id_cancha,
+                formData.fecha,
                 60
             );
-            
+
             if (responseReservas.success) {
                 setTodasLasReservas(responseReservas.data.horarios_ocupados || []);
             }
-            
+
             const response = await obtenerHorariosDisponibles(
-                formData.id_cancha, 
-                formData.fecha, 
+                formData.id_cancha,
+                formData.fecha,
                 formData.duracion
             );
-            
+
             if (response.success) {
                 const horariosOriginales = response.data.horarios_disponibles || [];
                 const reservasExistentes = responseReservas.data.horarios_ocupados || [];
-                
+
                 const horariosFiltrados = filtrarHorariosSinSuperposicion(
-                    horariosOriginales, 
-                    formData.duracion, 
+                    horariosOriginales,
+                    formData.duracion,
                     reservasExistentes
                 );
-                
+
                 setHorariosDisponibles(horariosFiltrados);
                 setHorariosOcupados(response.data.horarios_ocupados || []);
             }
@@ -196,7 +196,7 @@ const NuevaReserva = ({
             setError('Debes seleccionar una cancha');
             return false;
         }
-        
+
         if (!formData.nombre_usuario.trim()) {
             setError('El nombre del usuario es obligatorio');
             return false;
@@ -247,18 +247,18 @@ const NuevaReserva = ({
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         const validacion = validarFormulario();
         if (!validacion || !validacion.valid) {
             return;
         }
 
         const canchaInfo = canchaId ? canchaSeleccionada : canchas.find(c => c.id_cancha === parseInt(formData.id_cancha));
-        const fechaFormateada = new Date(formData.fecha).toLocaleDateString('es-ES', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
+        const fechaFormateada = new Date(formData.fecha).toLocaleDateString('es-ES', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
         });
 
         setConfirmData({
@@ -285,7 +285,7 @@ const NuevaReserva = ({
 
         try {
             const fechaHora = `${formData.fecha} ${formData.hora}:00`;
-            
+
             const reservaData = {
                 id_usuario: isAdmin ? null : (user?.userId || null),
                 id_cancha: parseInt(formData.id_cancha),
@@ -298,7 +298,7 @@ const NuevaReserva = ({
             };
 
             const response = await crearReserva(reservaData);
-            
+
             if (response.success) {
                 setSuccess('¡Reserva creada exitosamente!');
                 setTimeout(() => {
@@ -354,7 +354,7 @@ const NuevaReserva = ({
             <div className="max-w-2xl mx-auto mt-8 p-6 bg-white rounded-lg shadow-md">
                 <div className="text-center">
                     <div className="text-red-600 mb-4">{error}</div>
-                    <button 
+                    <button
                         onClick={() => navigate(isAdmin ? '/admin' : '/canchas')}
                         className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
                     >
@@ -446,7 +446,6 @@ const NuevaReserva = ({
                                         className="w-full px-3 py-2 sm:py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 text-sm sm:text-base"
                                         placeholder="Ej: Juan Pérez"
                                         required
-                                        readOnly={!isAdmin}
                                     />
                                 </div>
                                 <div>
@@ -461,7 +460,6 @@ const NuevaReserva = ({
                                         className="w-full px-3 py-2 sm:py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 text-sm sm:text-base"
                                         placeholder="ejemplo@correo.com"
                                         required
-                                        readOnly={!isAdmin}
                                     />
                                 </div>
                             </div>
@@ -586,11 +584,10 @@ const NuevaReserva = ({
                                                                             onChange={handleChange}
                                                                             className="sr-only"
                                                                         />
-                                                                        <span className={`text-sm px-2 py-2 rounded flex-1 text-center transition-all duration-200 ${
-                                                                            formData.hora === horario.hora 
-                                                                                ? 'bg-green-500 text-white ring-2 ring-green-400' 
+                                                                        <span className={`text-sm px-2 py-2 rounded flex-1 text-center transition-all duration-200 ${formData.hora === horario.hora
+                                                                                ? 'bg-green-500 text-white ring-2 ring-green-400'
                                                                                 : 'bg-green-100 text-green-800 hover:bg-green-200'
-                                                                        }`}>
+                                                                            }`}>
                                                                             {horario.horario}
                                                                         </span>
                                                                     </label>
@@ -598,7 +595,7 @@ const NuevaReserva = ({
                                                             </div>
                                                         </div>
                                                     )}
-                                                    
+
                                                     {/* Horarios ocupados (solo admin) */}
                                                     {isAdmin && todasLasReservas.length > 0 && (
                                                         <div>
@@ -616,11 +613,10 @@ const NuevaReserva = ({
                                                                             onChange={handleChange}
                                                                             className="sr-only"
                                                                         />
-                                                                        <span className={`text-sm px-2 py-2 rounded flex-1 text-center transition-all duration-200 border-2 ${
-                                                                            formData.hora === horario.hora 
-                                                                                ? 'bg-red-500 text-white ring-2 ring-red-400 border-red-600' 
+                                                                        <span className={`text-sm px-2 py-2 rounded flex-1 text-center transition-all duration-200 border-2 ${formData.hora === horario.hora
+                                                                                ? 'bg-red-500 text-white ring-2 ring-red-400 border-red-600'
                                                                                 : 'bg-red-100 text-red-800 hover:bg-red-200 border-red-300'
-                                                                        }`}>
+                                                                            }`}>
                                                                             {horario.horario}
                                                                         </span>
                                                                     </label>
@@ -631,10 +627,10 @@ const NuevaReserva = ({
                                                             </div>
                                                         </div>
                                                     )}
-                                                    
+
                                                     {formData.hora && (
                                                         <div className="text-sm p-3 bg-blue-50 rounded-lg border border-blue-200">
-                                                            <span className="font-medium text-blue-800">Hora seleccionada:</span> 
+                                                            <span className="font-medium text-blue-800">Hora seleccionada:</span>
                                                             <span className="ml-2 text-blue-700">{formData.hora}</span>
                                                             {todasLasReservas.find(h => h.hora === formData.hora) && isAdmin && (
                                                                 <span className="ml-2 text-red-700 font-medium">(⚠️ Superpuesta)</span>
@@ -718,11 +714,10 @@ const NuevaReserva = ({
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className={`w-full sm:flex-1 flex justify-center py-2 sm:py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition duration-200 ${
-                                    loading 
-                                        ? 'bg-gray-400 cursor-not-allowed' 
+                                className={`w-full sm:flex-1 flex justify-center py-2 sm:py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition duration-200 ${loading
+                                        ? 'bg-gray-400 cursor-not-allowed'
                                         : 'bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500'
-                                }`}
+                                    }`}
                             >
                                 {loading ? (
                                     <div className="flex items-center">
@@ -741,7 +736,7 @@ const NuevaReserva = ({
 
                     {/* Modal de Confirmación */}
                     {showConfirm && confirmData && (
-                        <ConfirmDialog 
+                        <ConfirmDialog
                             isOpen={showConfirm}
                             onConfirm={confirmarReserva}
                             onCancel={cancelarConfirmacion}
@@ -755,7 +750,7 @@ const NuevaReserva = ({
                                             <p className="text-sm text-red-700 mt-1">{confirmData.warning}</p>
                                         </div>
                                     )}
-                                    
+
                                     <div className="bg-blue-50 p-3 rounded-lg">
                                         <h4 className="font-semibold text-gray-800">📋 Detalles de la Reserva</h4>
                                         <div className="mt-2 space-y-1 text-sm">
@@ -768,7 +763,7 @@ const NuevaReserva = ({
                                             <p><span className="font-medium">Precio:</span> ${confirmData.precio?.toLocaleString()}</p>
                                         </div>
                                     </div>
-                                    
+
                                     <div className="text-center pt-2">
                                         <p className="text-sm text-gray-600">
                                             ¿Confirmas que deseas crear esta reserva?

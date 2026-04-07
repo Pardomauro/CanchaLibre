@@ -83,51 +83,5 @@ export const recuperarContrasena = async (email) => {
     }
 };
 
-// Función para restablecer contraseña con token
-export const restablecerContrasena = async (token, nuevaContrasena) => {
-    try {
-        const response = await fetch(`${API_BASE_URL}/usuarios/restablecer-contrasena`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ token, nuevaContrasena })
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            return data;
-        } else {
-            throw new Error('Error en la solicitud de restablecimiento de contraseña');
-        }
-    } catch (error) {
-        console.error('Error en la función restablecerContrasena:', error);
-        throw error;
-    }
-};
-
-// Función para validar token de recuperación
-export const validarTokenRecuperacion = async (token) => {
-    try {
-        const response = await fetch(`${API_BASE_URL}/usuarios/validar-token-recuperacion`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ token })
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            return data;
-        } else {
-            throw new Error('Token inválido o expirado');
-        }
-    } catch (error) {
-        console.error('Error en la función validarTokenRecuperacion:', error);
-        throw error;
-    }
-};
-
 // NOTA: La función obtenerPerfilUsuario se movió a usuarios.js 
 // para mantener mejor organización del código (funciones CRUD de usuarios)

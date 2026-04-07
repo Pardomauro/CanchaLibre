@@ -131,28 +131,3 @@ export const validacionesVerificarCodigo = [
         .matches(/[A-Z]/)
         .withMessage('La contraseña debe contener al menos una mayúscula')
 ];
-
-/**
- * Validaciones para restablecer contraseña
- */
-export const validacionesRestablecerContrasena = [
-    body('token')
-        .notEmpty()
-        .withMessage('El token es requerido'),
-    body('nuevaContrasena')
-        .isLength({ min: 6 })
-        .withMessage('La contraseña debe tener al menos 6 caracteres')
-        .matches(/\d/)
-        .withMessage('La contraseña debe contener al menos un número')
-        .matches(/[A-Z]/)
-        .withMessage('La contraseña debe contener al menos una mayúscula')
-];
-
-/**
- * Validaciones para validar token de recuperación
- */
-export const validacionesValidarToken = [
-    body('token')
-        .notEmpty()
-        .withMessage('El token es requerido')
-];

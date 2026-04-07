@@ -1,5 +1,4 @@
 import mysql from 'mysql2/promise';
-import { InternalServerError } from '../utils/errors.js';
 import 'dotenv/config';
 
 // Configuración de la base de datos
@@ -27,7 +26,7 @@ const createConnection = async () => {
 }
 
 
-// Creamos pool de conexiones
+// Creamos pool de conexiones para manejar múltiples conexiones de forma eficiente
 
 const pool = mysql.createPool({
     ...dbConfig,

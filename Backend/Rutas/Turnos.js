@@ -497,8 +497,36 @@ router.post('/', [
 
 
         // Insertar el nuevo turno en la base de datos
-        // Si no hay id_usuario (reserva de admin), usar 1 como valor por defecto
-        const idUsuarioFinal = id_usuario || 1;
+        // Si no hay id_usuario (reserva de admin), buscar o crear usuario por email
+        let idUsuarioFinal = id_usuario;
+        
+        if (!idUsuarioFinal && email) {
+            // Buscar usuario por email
+            const [usuarioExistente] = await pool.query(
+                'SELECT id_usuario FROM usuarios WHERE email = ?',
+                [email]
+            );
+            
+            if (usuarioExistente.length > 0) {
+                idUsuarioFinal = usuarioExistente[0].id_usuario;
+                console.log('✅ Usuario encontrado por email:', email, '- ID:', idUsuarioFinal);
+            } else {
+                // Crear usuario temporal si no existe
+                const passwordTemporal = Math.random().toString(36).slice(-8);
+                const [nuevoUsuario] = await pool.query(
+                    'INSERT INTO usuarios (nombre, email, contrasena, rol) VALUES (?, ?, ?, ?)',
+                    [nombre || 'Cliente', email, passwordTemporal, 'usuario']
+                );
+                idUsuarioFinal = nuevoUsuario.insertId;
+                console.log('✅ Usuario creado temporalmente:', email, '- ID:', idUsuarioFinal);
+            }
+        }
+        
+        // Si aún no hay id_usuario, usar el del admin actual
+        if (!idUsuarioFinal) {
+            idUsuarioFinal = req.usuario?.userId || null;
+            console.log('⚠️ Usando ID del admin actual:', idUsuarioFinal);
+        }
 
         const [result] = await pool.query(`INSERT INTO turnos
             (id_usuario, id_cancha, fecha_turno, duracion, precio, estado)

@@ -19,9 +19,7 @@ export {
     validacionesActualizarUsuario,
     validacionesEliminarUsuario,
     validacionesRecuperarContrasena,
-    validacionesVerificarCodigo,
-    validacionesRestablecerContrasena,
-    validacionesValidarToken
+    validacionesVerificarCodigo
 } from './usuariosValidation.js';
 
 // Validaciones específicas de Turnos

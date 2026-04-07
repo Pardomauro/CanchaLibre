@@ -81,18 +81,24 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-6 sm:py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="fixed inset-0 bg-gradient-to-br from-[#DAD7CD] to-[#A3B18A] flex items-center justify-center py-6 sm:py-12 px-4 sm:px-6 lg:px-8 overflow-y-auto">
+      <div className="max-w-md w-full space-y-8 my-auto">
         <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
           {/* Header */}
           <div className="text-center mb-6 sm:mb-8">
-            <div className="mx-auto h-16 w-16 sm:h-20 sm:w-20 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mb-3 sm:mb-4">
-              <svg className="h-8 w-8 sm:h-10 sm:w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
+            <div className="mx-auto mb-6 flex items-center justify-center">
+              <img 
+                src="/logoSaaS.png" 
+                alt="Cancha Libre Logo" 
+                className="h-24 w-auto sm:h-28 object-contain"
+              />
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900">¡Bienvenido!</h2>
-            <p className="mt-2 text-sm text-gray-600">Inicia sesión en tu cuenta del sistema de turnos</p>
+            <h2 className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-[#588157] to-[#3A5A40] bg-clip-text text-transparent">
+              ¡Bienvenido a Cancha Libre!
+            </h2>
+            <p className="mt-3 text-sm sm:text-base text-gray-600">
+              Gestiona tus reservas deportivas de forma simple y rápida
+            </p>
           </div>
 
           {/* Error Message */}
@@ -118,7 +124,7 @@ const Login = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-3 py-2.5 sm:py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 text-sm sm:text-base"
+                className="w-full px-3 py-2.5 sm:py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#588157] focus:border-transparent transition duration-200 text-sm sm:text-base"
                 placeholder="ejemplo@correo.com"
                 required
               />
@@ -134,7 +140,7 @@ const Login = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full px-3 py-2.5 sm:py-3 pr-10 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 text-sm sm:text-base"
+                  className="w-full px-3 py-2.5 sm:py-3 pr-10 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#588157] focus:border-transparent transition duration-200 text-sm sm:text-base"
                   placeholder="Tu contraseña"
                   required
                 />
@@ -161,7 +167,7 @@ const Login = () => {
             <div className="flex items-center justify-end">
               <Link 
                 to="/recuperar-password" 
-                className="text-xs sm:text-sm text-blue-600 hover:text-blue-500 font-medium transition duration-200"
+                className="text-xs sm:text-sm text-[#588157] hover:text-[#3A5A40] font-medium transition duration-200"
               >
                 ¿Olvidaste tu contraseña?
               </Link>
@@ -174,7 +180,7 @@ const Login = () => {
               className={`w-full flex justify-center py-2.5 sm:py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition duration-200 ${
                 loading 
                   ? 'bg-gray-400 cursor-not-allowed' 
-                  : 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+                  : 'bg-gradient-to-r from-[#588157] to-[#3A5A40] hover:from-[#3A5A40] hover:to-[#344E41] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#588157]'
               }`}
             >
               {loading ? (
@@ -196,7 +202,7 @@ const Login = () => {
             <div className="text-center space-y-2 sm:space-y-3">
               <p className="text-xs sm:text-sm text-gray-600">
                 ¿No tienes cuenta?{' '}
-                <Link to="/registro" className="font-medium text-green-600 hover:text-green-500 transition duration-200">
+                <Link to="/registro" className="font-medium text-[#588157] hover:text-[#3A5A40] transition duration-200">
                   Regístrate aquí
                 </Link>
               </p>

@@ -7,7 +7,6 @@ import Unauthorized from '../auth/Unauthorized';
 import Login from '../../pages/usuario/login';
 import Registro from '../../pages/usuario/registro';
 import RecuperarPassword from '../../pages/usuario/RecuperarPassword';
-import RestablecerPassword from '../../pages/usuario/RestablecerPassword';
 import Perfil from '../../pages/usuario/perfil';
 
 // Páginas de admin
@@ -51,7 +50,6 @@ export default function RutasApp() {
             <Route path="/login" element={<Login />} />
             <Route path="/registro" element={<Registro />} />
             <Route path="/recuperar-password" element={<RecuperarPassword />} />
-            <Route path="/restablecer-password" element={<RestablecerPassword />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
             
             {/* Rutas Protegidas para Usuarios */}

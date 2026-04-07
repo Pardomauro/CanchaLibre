@@ -102,8 +102,6 @@ npm run test:email    # Test de configuración email
 - `POST /api/usuarios/registrar` - Registrar usuario
 - `POST /api/usuarios/recuperar-contrasena` - Recuperar contraseña
 - `POST /api/usuarios/verificar-codigo` - Verificar código de recuperación
-- `POST /api/usuarios/restablecer-contrasena` - Restablecer contraseña
-- `POST /api/usuarios/validar-token-recuperacion` - Validar token de recuperación
 
 ### **Usuarios**
 - `GET /api/usuarios` - Obtener todos los usuarios (Admin)
