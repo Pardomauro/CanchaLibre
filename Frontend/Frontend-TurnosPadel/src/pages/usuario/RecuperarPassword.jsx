@@ -105,11 +105,11 @@ const RecuperarPassword = () => {
     // Mostrar mensaje de éxito al final
     if (message && step === 2 && message.includes('Contraseña actualizada')) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-md w-full space-y-8">
+            <div className="fixed inset-0 bg-gradient-to-br from-[#DAD7CD] to-[#A3B18A] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 overflow-y-auto">
+                <div className="max-w-md w-full space-y-8 my-auto">
                     <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
-                        <div className="mx-auto h-20 w-20 bg-green-100 rounded-full flex items-center justify-center mb-6">
-                            <svg className="h-10 w-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="mx-auto h-20 w-20 bg-[#DAD7CD] rounded-full flex items-center justify-center mb-6">
+                            <svg className="h-10 w-10 text-[#588157]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
@@ -122,7 +122,7 @@ const RecuperarPassword = () => {
                         </p>
                         <Link 
                             to="/login" 
-                            className="w-full inline-flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200"
+                            className="w-full inline-flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-[#588157] to-[#3A5A40] hover:from-[#3A5A40] hover:to-[#344E41] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#588157] transition duration-200"
                         >
                             Ir al Login
                         </Link>
@@ -133,13 +133,20 @@ const RecuperarPassword = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-md w-full space-y-8">
+        <div className="fixed inset-0 bg-gradient-to-br from-[#DAD7CD] to-[#A3B18A] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 overflow-y-auto">
+            <div className="max-w-md w-full space-y-8 my-auto">
                 <div className="bg-white rounded-2xl shadow-xl p-8">
                     {/* Header */}
                     <div className="text-center mb-8">
-                        <div className="mx-auto h-20 w-20 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mb-4">
-                            <svg className="h-10 w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="mx-auto mb-6 flex items-center justify-center">
+                            <img 
+                                src="/logoSaaS.png" 
+                                alt="Cancha Libre Logo" 
+                                className="h-20 w-auto object-contain"
+                            />
+                        </div>
+                        <div className="mx-auto h-16 w-16 bg-gradient-to-r from-[#588157] to-[#3A5A40] rounded-full flex items-center justify-center mb-4">
+                            <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 {step === 1 ? (
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 ) : (
@@ -147,10 +154,10 @@ const RecuperarPassword = () => {
                                 )}
                             </svg>
                         </div>
-                        <h2 className="text-3xl font-extrabold text-gray-900">
+                        <h2 className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-[#588157] to-[#3A5A40] bg-clip-text text-transparent">
                             {step === 1 ? '¿Olvidaste tu contraseña?' : 'Ingresa el código de verificación'}
                         </h2>
-                        <p className="mt-2 text-sm text-gray-600">
+                        <p className="mt-3 text-sm sm:text-base text-gray-600">
                             {step === 1 
                                 ? 'No te preocupes, ingresa tu email y te enviaremos un código de verificación'
                                 : 'Revisa tu email y ingresa el código de 6 dígitos que recibiste'
@@ -194,7 +201,7 @@ const RecuperarPassword = () => {
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                                    className="w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#588157] focus:border-transparent transition duration-200"
                                     placeholder="ejemplo@correo.com"
                                     required
                                 />
@@ -209,7 +216,7 @@ const RecuperarPassword = () => {
                                 className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition duration-200 ${
                                     loading 
                                         ? 'bg-gray-400 cursor-not-allowed' 
-                                        : 'bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500'
+                                        : 'bg-gradient-to-r from-[#588157] to-[#3A5A40] hover:from-[#3A5A40] hover:to-[#344E41] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#588157]'
                                 }`}
                             >
                                 {loading ? (
@@ -236,7 +243,7 @@ const RecuperarPassword = () => {
                                     type="text"
                                     value={codigo}
                                     onChange={(e) => setCodigo(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                                    className="w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 text-center text-2xl tracking-widest"
+                                    className="w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#588157] focus:border-transparent transition duration-200 text-center text-2xl tracking-widest"
                                     placeholder="123456"
                                     maxLength={6}
                                     required
@@ -255,7 +262,7 @@ const RecuperarPassword = () => {
                                         type={showPassword ? 'text' : 'password'}
                                         value={nuevaContrasena}
                                         onChange={(e) => setNuevaContrasena(e.target.value)}
-                                        className="w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 pr-10"
+                                        className="w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#588157] focus:border-transparent transition duration-200 pr-10"
                                         placeholder="Nueva contraseña"
                                         required
                                     />
@@ -284,7 +291,7 @@ const RecuperarPassword = () => {
                                         type={showConfirmPassword ? 'text' : 'password'}
                                         value={confirmarContrasena}
                                         onChange={(e) => setConfirmarContrasena(e.target.value)}
-                                        className="w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 pr-10"
+                                        className="w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#588157] focus:border-transparent transition duration-200 pr-10"
                                         placeholder="Confirma tu contraseña"
                                         required
                                     />
@@ -305,13 +312,13 @@ const RecuperarPassword = () => {
                                 <div className="mt-2 text-xs text-gray-500">
                                     <p>La contraseña debe tener:</p>
                                     <ul className="list-disc list-inside space-y-1">
-                                        <li className={nuevaContrasena.length >= 6 ? 'text-green-600' : 'text-gray-400'}>
+                                        <li className={nuevaContrasena.length >= 6 ? 'text-[#588157]' : 'text-gray-400'}>
                                             Al menos 6 caracteres
                                         </li>
-                                        <li className={/\d/.test(nuevaContrasena) ? 'text-green-600' : 'text-gray-400'}>
+                                        <li className={/\d/.test(nuevaContrasena) ? 'text-[#588157]' : 'text-gray-400'}>
                                             Al menos un número
                                         </li>
-                                        <li className={/[A-Z]/.test(nuevaContrasena) ? 'text-green-600' : 'text-gray-400'}>
+                                        <li className={/[A-Z]/.test(nuevaContrasena) ? 'text-[#588157]' : 'text-gray-400'}>
                                             Al menos una mayúscula
                                         </li>
                                     </ul>
@@ -329,7 +336,7 @@ const RecuperarPassword = () => {
                                         setError('');
                                         setMessage('');
                                     }}
-                                    className="flex-1 py-3 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200"
+                                    className="flex-1 py-3 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#588157] transition duration-200"
                                 >
                                     Volver
                                 </button>
@@ -339,7 +346,7 @@ const RecuperarPassword = () => {
                                     className={`flex-1 flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition duration-200 ${
                                         loading 
                                             ? 'bg-gray-400 cursor-not-allowed' 
-                                            : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500'
+                                            : 'bg-gradient-to-r from-[#588157] to-[#3A5A40] hover:from-[#3A5A40] hover:to-[#344E41] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#588157]'
                                     }`}
                                 >
                                     {loading ? (
@@ -363,7 +370,7 @@ const RecuperarPassword = () => {
                         <div className="text-center">
                             <p className="text-sm text-gray-600">
                                 ¿Recordaste tu contraseña?{' '}
-                                <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500 transition duration-200">
+                                <Link to="/login" className="font-medium text-[#588157] hover:text-[#3A5A40] transition duration-200">
                                     Volver al Login
                                 </Link>
                             </p>
