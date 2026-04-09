@@ -1,6 +1,6 @@
 // API para la autenticación de usuarios 
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 // Función para iniciar sesión
 export const loginUsuario = async (email, password) => {
@@ -15,7 +15,7 @@ export const loginUsuario = async (email, password) => {
 
         if (response.ok) {
             const data = await response.json();
-            
+
             if (data.success) {
                 return {
                     token: data.token,
@@ -83,5 +83,5 @@ export const recuperarContrasena = async (email) => {
     }
 };
 
-// NOTA: La función obtenerPerfilUsuario se movió a usuarios.js 
+// NOTA: La función obtenerPerfilUsuario se movió a usuarios.js
 // para mantener mejor organización del código (funciones CRUD de usuarios)

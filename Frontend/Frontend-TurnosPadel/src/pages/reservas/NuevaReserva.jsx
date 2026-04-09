@@ -133,6 +133,7 @@ const NuevaReserva = ({
 
     const cargarHorariosDisponibles = async () => {
         try {
+            setError('');
             const responseReservas = await obtenerHorariosDisponibles(
                 formData.id_cancha,
                 formData.fecha,
@@ -151,7 +152,7 @@ const NuevaReserva = ({
 
             if (response.success) {
                 const horariosOriginales = response.data.horarios_disponibles || [];
-                const reservasExistentes = responseReservas.data.horarios_ocupados || [];
+                const reservasExistentes = responseReservas?.data?.horarios_ocupados || [];
 
                 const horariosFiltrados = filtrarHorariosSinSuperposicion(
                     horariosOriginales,
@@ -167,6 +168,16 @@ const NuevaReserva = ({
             setHorariosDisponibles([]);
             setHorariosOcupados([]);
             setTodasLasReservas([]);
+
+            const status = err?.status;
+            const message = err?.message;
+            if (status === 404) {
+                setError(message || 'No se encontraron horarios para la cancha seleccionada');
+            } else if (status === 400) {
+                setError(message || 'Parámetros inválidos para obtener horarios');
+            } else {
+                setError(message || 'Error al cargar horarios disponibles');
+            }
         }
     };
 
@@ -507,7 +518,7 @@ const NuevaReserva = ({
                                     </div>
                                 )}
                             </div>
-                            
+
                             {/* Información adicional para el admin */}
                             {isAdmin && formData.fecha && formData.id_cancha && (
                                 <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
@@ -585,8 +596,8 @@ const NuevaReserva = ({
                                                                             className="sr-only"
                                                                         />
                                                                         <span className={`text-sm px-2 py-2 rounded flex-1 text-center transition-all duration-200 ${formData.hora === horario.hora
-                                                                                ? 'bg-green-500 text-white ring-2 ring-green-400'
-                                                                                : 'bg-green-100 text-green-800 hover:bg-green-200'
+                                                                            ? 'bg-green-500 text-white ring-2 ring-green-400'
+                                                                            : 'bg-green-100 text-green-800 hover:bg-green-200'
                                                                             }`}>
                                                                             {horario.horario}
                                                                         </span>
@@ -614,8 +625,8 @@ const NuevaReserva = ({
                                                                             className="sr-only"
                                                                         />
                                                                         <span className={`text-sm px-2 py-2 rounded flex-1 text-center transition-all duration-200 border-2 ${formData.hora === horario.hora
-                                                                                ? 'bg-red-500 text-white ring-2 ring-red-400 border-red-600'
-                                                                                : 'bg-red-100 text-red-800 hover:bg-red-200 border-red-300'
+                                                                            ? 'bg-red-500 text-white ring-2 ring-red-400 border-red-600'
+                                                                            : 'bg-red-100 text-red-800 hover:bg-red-200 border-red-300'
                                                                             }`}>
                                                                             {horario.horario}
                                                                         </span>
@@ -715,8 +726,8 @@ const NuevaReserva = ({
                                 type="submit"
                                 disabled={loading}
                                 className={`w-full sm:flex-1 flex justify-center py-2 sm:py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition duration-200 ${loading
-                                        ? 'bg-gray-400 cursor-not-allowed'
-                                        : 'bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500'
+                                    ? 'bg-gray-400 cursor-not-allowed'
+                                    : 'bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500'
                                     }`}
                             >
                                 {loading ? (

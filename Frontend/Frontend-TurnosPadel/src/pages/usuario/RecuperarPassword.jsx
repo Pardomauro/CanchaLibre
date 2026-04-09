@@ -20,7 +20,7 @@ const RecuperarPassword = () => {
         setLoading(true);
 
         try {
-            const response = await fetch('http://localhost:3000/api/usuarios/recuperar-contrasena', {
+            const response = await fetch('/api/usuarios/recuperar-contrasena', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -46,7 +46,7 @@ const RecuperarPassword = () => {
 
     const handleCodeSubmit = async (e) => {
         e.preventDefault();
-        
+
         if (nuevaContrasena !== confirmarContrasena) {
             setError('Las contraseñas no coinciden');
             return;
@@ -72,7 +72,7 @@ const RecuperarPassword = () => {
         setError('');
 
         try {
-            const response = await fetch('http://localhost:3000/api/usuarios/verificar-codigo', {
+            const response = await fetch('/api/usuarios/verificar-codigo', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -120,8 +120,8 @@ const RecuperarPassword = () => {
                         <p className="text-sm text-gray-500 mb-6">
                             Serás redirigido al login en unos segundos...
                         </p>
-                        <Link 
-                            to="/login" 
+                        <Link
+                            to="/login"
                             className="w-full inline-flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-[#588157] to-[#3A5A40] hover:from-[#3A5A40] hover:to-[#344E41] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#588157] transition duration-200"
                         >
                             Ir al Login
@@ -139,9 +139,9 @@ const RecuperarPassword = () => {
                     {/* Header */}
                     <div className="text-center mb-8">
                         <div className="mx-auto mb-6 flex items-center justify-center">
-                            <img 
-                                src="/logoSaaS.png" 
-                                alt="Cancha Libre Logo" 
+                            <img
+                                src="/logoSaaS.png"
+                                alt="Cancha Libre Logo"
                                 className="h-20 w-auto object-contain"
                             />
                         </div>
@@ -158,7 +158,7 @@ const RecuperarPassword = () => {
                             {step === 1 ? '¿Olvidaste tu contraseña?' : 'Ingresa el código de verificación'}
                         </h2>
                         <p className="mt-3 text-sm sm:text-base text-gray-600">
-                            {step === 1 
+                            {step === 1
                                 ? 'No te preocupes, ingresa tu email y te enviaremos un código de verificación'
                                 : 'Revisa tu email y ingresa el código de 6 dígitos que recibiste'
                             }
@@ -213,11 +213,10 @@ const RecuperarPassword = () => {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition duration-200 ${
-                                    loading 
-                                        ? 'bg-gray-400 cursor-not-allowed' 
+                                className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition duration-200 ${loading
+                                        ? 'bg-gray-400 cursor-not-allowed'
                                         : 'bg-gradient-to-r from-[#588157] to-[#3A5A40] hover:from-[#3A5A40] hover:to-[#344E41] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#588157]'
-                                }`}
+                                    }`}
                             >
                                 {loading ? (
                                     <div className="flex items-center">
@@ -343,11 +342,10 @@ const RecuperarPassword = () => {
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className={`flex-1 flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition duration-200 ${
-                                        loading 
-                                            ? 'bg-gray-400 cursor-not-allowed' 
+                                    className={`flex-1 flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition duration-200 ${loading
+                                            ? 'bg-gray-400 cursor-not-allowed'
                                             : 'bg-gradient-to-r from-[#588157] to-[#3A5A40] hover:from-[#3A5A40] hover:to-[#344E41] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#588157]'
-                                    }`}
+                                        }`}
                                 >
                                     {loading ? (
                                         <div className="flex items-center">

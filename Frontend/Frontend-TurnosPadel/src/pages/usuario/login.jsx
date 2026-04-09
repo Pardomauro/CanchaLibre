@@ -27,40 +27,40 @@ const Login = () => {
     setLoading(true);
 
     try {
-      
+
       // Hacer login manual para verificar
-      const manualResponse = await fetch('http://localhost:3000/api/usuarios/login', {
+      const manualResponse = await fetch('/api/usuarios/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          email: formData.email, 
-          password: formData.password 
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password
         })
       });
-      
+
       const manualData = await manualResponse.json();
-      
+
       if (manualData.success) {
         // Guardar en localStorage
         localStorage.setItem('token', manualData.token);
         localStorage.setItem('userId', manualData.userId.toString());
         localStorage.setItem('userRole', manualData.role);
-        
+
         console.log('💾 Guardado en localStorage:', {
           token: 'Presente',
           userId: localStorage.getItem('userId'),
           userRole: localStorage.getItem('userRole')
         });
-        
+
         // Usar el contexto de autenticación
         login({
           userId: manualData.userId,
           role: manualData.role,
           token: manualData.token
         });
-        
+
         console.log('✅ Login completado, redirigiendo...');
-        
+
         // Redirigir según el rol
         if (manualData.role === 'administrador') {
           console.log('📍 Redirigiendo a /admin');
@@ -87,9 +87,9 @@ const Login = () => {
           {/* Header */}
           <div className="text-center mb-6 sm:mb-8">
             <div className="mx-auto mb-6 flex items-center justify-center">
-              <img 
-                src="/logoSaaS.png" 
-                alt="Cancha Libre Logo" 
+              <img
+                src="/logoSaaS.png"
+                alt="Cancha Libre Logo"
                 className="h-24 w-auto sm:h-28 object-contain"
               />
             </div>
@@ -165,8 +165,8 @@ const Login = () => {
 
             {/* Forgot Password Link */}
             <div className="flex items-center justify-end">
-              <Link 
-                to="/recuperar-password" 
+              <Link
+                to="/recuperar-password"
                 className="text-xs sm:text-sm text-[#588157] hover:text-[#3A5A40] font-medium transition duration-200"
               >
                 ¿Olvidaste tu contraseña?
@@ -177,11 +177,10 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full flex justify-center py-2.5 sm:py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition duration-200 ${
-                loading 
-                  ? 'bg-gray-400 cursor-not-allowed' 
+              className={`w-full flex justify-center py-2.5 sm:py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition duration-200 ${loading
+                  ? 'bg-gray-400 cursor-not-allowed'
                   : 'bg-gradient-to-r from-[#588157] to-[#3A5A40] hover:from-[#3A5A40] hover:to-[#344E41] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#588157]'
-              }`}
+                }`}
             >
               {loading ? (
                 <div className="flex items-center">

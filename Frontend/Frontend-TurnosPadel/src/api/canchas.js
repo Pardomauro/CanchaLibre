@@ -1,7 +1,7 @@
 
 // Peticiones http relacionadas con las canchas
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 // Función para obtener el token de autenticación
 const getAuthHeaders = () => {
@@ -28,7 +28,7 @@ export const obtenerCanchas = async () => {
 
         const data = await response.json();
         console.log('Respuesta API canchas:', data); // Para debug
-        
+
         // Siempre retornar un array para consistencia
         return data.data || data || [];
     } catch (error) {
@@ -111,7 +111,7 @@ export const crearCancha = async (canchaData) => {
 export const actualizarCancha = async (id, canchaData) => {
     try {
         console.log('📤 Enviando datos para actualizar cancha:', { id, canchaData });
-        
+
         const response = await fetch(`${API_BASE_URL}/canchas/${id}`, {
             method: 'PUT',
             headers: {
@@ -132,7 +132,7 @@ export const actualizarCancha = async (id, canchaData) => {
                 const errorData = await response.json();
                 console.error('❌ Detalles del error:', errorData);
                 errorMessage = errorData.message || errorMessage;
-                
+
                 // Si hay errores de validación específicos, mostrarlos
                 if (errorData.errors && Array.isArray(errorData.errors)) {
                     const validationErrors = errorData.errors.map(err => err.msg).join(', ');

@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { obtenerUsuarios, crearUsuario, eliminarUsuario } from '../../api/usuarios';
 import ConfirmDialog from '../../components/accionesCriticas/ConfirmDialog';
 
 const GestionUsuarios = () => {
+    const navigate = useNavigate();
+    const { user, logout } = useAuth();
     const [usuarios, setUsuarios] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -11,7 +15,7 @@ const GestionUsuarios = () => {
     const [showConfirmDelete, setShowConfirmDelete] = useState(false);
     const [usuarioAEliminar, setUsuarioAEliminar] = useState(null);
     const [eliminando, setEliminando] = useState(null);
-    
+
     const [formData, setFormData] = useState({
         nombre: '',
         email: '',
@@ -25,12 +29,18 @@ const GestionUsuarios = () => {
     const cargarUsuarios = async () => {
         try {
             setLoading(true);
-            const data = await obtenerUsuarios();
+            const data = await obtenerUsuarios(user?.token);
             setUsuarios(data);
             setError('');
         } catch (err) {
             console.error('Error cargando usuarios:', err);
-            setError('Error al cargar los usuarios');
+            if (err?.status === 401) {
+                setError('Sesión expirada o no autorizada. Volvé a iniciar sesión.');
+                logout();
+                navigate('/login', { replace: true });
+            } else {
+                setError(err?.message || 'Error al cargar los usuarios');
+            }
         } finally {
             setLoading(false);
         }
@@ -46,7 +56,7 @@ const GestionUsuarios = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         if (!formData.nombre || !formData.email || !formData.password) {
             alert('Por favor completa todos los campos');
             return;
@@ -60,14 +70,14 @@ const GestionUsuarios = () => {
         setSubmitting(true);
         try {
             await crearUsuario(formData);
-            
+
             // Limpiar formulario
             setFormData({ nombre: '', email: '', password: '' });
             setShowCreateForm(false);
-            
+
             // Recargar usuarios
             await cargarUsuarios();
-            
+
             alert('Usuario creado exitosamente');
         } catch (err) {
             console.error('Error creando usuario:', err);
@@ -79,10 +89,10 @@ const GestionUsuarios = () => {
 
     const handleEliminar = async (userId, nombreUsuario, emailUsuario) => {
         // Preparar datos para el modal de confirmación
-        setUsuarioAEliminar({ 
-            id_usuario: userId, 
+        setUsuarioAEliminar({
+            id_usuario: userId,
             nombre: nombreUsuario,
-            email: emailUsuario 
+            email: emailUsuario
         });
         setShowConfirmDelete(true);
     };
@@ -93,13 +103,13 @@ const GestionUsuarios = () => {
         try {
             setShowConfirmDelete(false);
             setEliminando(usuarioAEliminar.id_usuario);
-            
+
             // Eliminar del sistema
             await eliminarUsuario(usuarioAEliminar.id_usuario);
-            
+
             // Recargar la lista de usuarios
             await cargarUsuarios();
-            
+
             alert('Usuario eliminado exitosamente del sistema.');
         } catch (err) {
             console.error('Error eliminando usuario:', err);
@@ -156,7 +166,7 @@ const GestionUsuarios = () => {
                                     required
                                 />
                             </div>
-                            
+
                             <div>
                                 <label className="block text-sm font-medium mb-2">
                                     Email *
@@ -215,7 +225,7 @@ const GestionUsuarios = () => {
                 <div className="bg-gray-50 px-6 py-3 border-b">
                     <h3 className="font-semibold">Usuarios Registrados ({usuarios.length})</h3>
                 </div>
-                
+
                 {usuarios.length === 0 ? (
                     <div className="p-6 text-center text-gray-500">
                         No hay usuarios registrados
@@ -255,11 +265,10 @@ const GestionUsuarios = () => {
                                             <button
                                                 onClick={() => handleEliminar(usuario.id_usuario, usuario.nombre, usuario.email)}
                                                 disabled={eliminando === usuario.id_usuario}
-                                                className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-                                                    eliminando === usuario.id_usuario 
-                                                        ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
+                                                className={`px-3 py-1 rounded text-sm font-medium transition-colors ${eliminando === usuario.id_usuario
+                                                        ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
                                                         : 'bg-red-600 hover:bg-red-700 text-white'
-                                                }`}
+                                                    }`}
                                             >
                                                 {eliminando === usuario.id_usuario ? '⏳ Eliminando...' : 'Eliminar Usuario'}
                                             </button>
@@ -274,7 +283,7 @@ const GestionUsuarios = () => {
 
             {/* Modal de Confirmación para Eliminar Usuario */}
             {showConfirmDelete && usuarioAEliminar && (
-                <ConfirmDialog 
+                <ConfirmDialog
                     isOpen={showConfirmDelete}
                     onConfirm={confirmarEliminacion}
                     onCancel={cancelarEliminacion}
@@ -285,7 +294,7 @@ const GestionUsuarios = () => {
                                 <h4 className="font-semibold text-red-800 mb-3">
                                     ¿Estás seguro de eliminar este usuario del sistema?
                                 </h4>
-                                
+
                                 {/* Información del usuario */}
                                 <div className="bg-gray-50 p-3 rounded-lg mb-3">
                                     <h5 className="font-medium text-gray-800 mb-2">Detalles del Usuario:</h5>
@@ -309,20 +318,20 @@ const GestionUsuarios = () => {
                                         <li>• No se puede deshacer esta operación</li>
                                     </ul>
                                 </div>
-                                
+
                                 {/* Nota importante */}
                                 <div className="bg-yellow-50 border-l-4 border-yellow-400 p-3 mt-3">
                                     <div className="flex">
                                         <div className="ml-3">
                                             <p className="text-sm text-yellow-800">
-                                                <span className="font-medium">Nota:</span> Si solo necesitas desactivar temporalmente al usuario, 
+                                                <span className="font-medium">Nota:</span> Si solo necesitas desactivar temporalmente al usuario,
                                                 considera usar la función de "suspensión" en lugar de eliminación permanente.
                                             </p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div className="text-center pt-2">
                                 <p className="text-sm font-medium text-gray-800">
                                     Solo los administradores pueden realizar esta acción crítica

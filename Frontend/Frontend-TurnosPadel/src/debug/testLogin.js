@@ -3,38 +3,38 @@
 
 async function probarLogin() {
     console.log('🔍 Probando login desde el frontend...');
-    
+
     const email = 'sistematurnos2025@gmail.com';
     const password = 'Sistematurnos2025.@';
-    
+
     try {
         console.log('📡 Enviando petición de login...');
         console.log(`Email: ${email}`);
-        
-        const response = await fetch('http://localhost:3000/api/usuarios/login', {
+
+        const response = await fetch('/api/usuarios/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({ email, password })
         });
-        
+
         console.log('📥 Respuesta recibida:', response.status, response.statusText);
-        
+
         if (response.ok) {
             const data = await response.json();
             console.log('✅ Login exitoso:', data);
-            
+
             // Guardar en localStorage como lo hace el frontend
             localStorage.setItem('token', data.token);
             localStorage.setItem('userId', data.userId);
             localStorage.setItem('userRole', data.role);
-            
+
             console.log('💾 Datos guardados en localStorage:');
             console.log('Token:', localStorage.getItem('token') ? 'Presente' : 'Ausente');
             console.log('UserId:', localStorage.getItem('userId'));
             console.log('UserRole:', localStorage.getItem('userRole'));
-            
+
             return data;
         } else {
             const error = await response.json();

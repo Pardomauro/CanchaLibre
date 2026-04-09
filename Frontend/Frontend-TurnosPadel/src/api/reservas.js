@@ -2,12 +2,39 @@
 // Peticiones http relacionadas con las reservas 
 import { validarDatosReserva } from '../utils';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+
+
+const normalizarToken = (token) => {
+    if (!token) return null;
+    let t = String(token).trim();
+    if (!t || t === 'null' || t === 'undefined') return null;
+    t = t.replace(/^Bearer\s+/i, '');
+    if ((t.startsWith('"') && t.endsWith('"')) || (t.startsWith("'") && t.endsWith("'"))) {
+        t = t.slice(1, -1);
+    }
+    return t || null;
+};
+
+const leerErrorRespuesta = async (response) => {
+    const contentType = response.headers?.get?.('content-type') || '';
+    try {
+        if (contentType.includes('application/json')) return await response.json();
+        const text = await response.text();
+        const trimmed = (text || '').trim();
+        if (trimmed.startsWith('<!doctype html') || trimmed.startsWith('<html')) {
+            return { message: 'Endpoint no encontrado (revisá backend/proxy)' };
+        }
+        return { message: trimmed };
+    } catch {
+        return {};
+    }
+};
 
 
 // Helper para crear headers con Authorization si existe token
-const getAuthHeaders = () => {
-    const token = localStorage.getItem('token');
+const getAuthHeaders = (tokenOverride) => {
+    const token = normalizarToken(tokenOverride ?? localStorage.getItem('token'));
     const headers = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = `Bearer ${token}`;
     return headers;
@@ -76,13 +103,13 @@ export const crearReserva = async (reserva) => {
             console.error('Error response completo:', errorData);
             console.error('Status:', response.status);
             console.error('Status Text:', response.statusText);
-            
+
             // Si hay errores de validación específicos, mostrarlos
             if (errorData.errors) {
                 console.error('Errores de validación:', errorData.errors);
                 throw new Error(`Errores de validación: ${errorData.errors.map(e => e.msg).join(', ')}`);
             }
-            
+
             throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`);
         }
 
@@ -272,13 +299,25 @@ export const obtenerReservaUsuario = async (userId) => {
 // Función para obtener horarios disponibles de una cancha en una fecha específica
 export const obtenerHorariosDisponibles = async (id_cancha, fecha, duracion = 60) => {
     try {
-        const response = await fetch(`${API_BASE_URL}/turnos/horarios-disponibles/${id_cancha}/${fecha}/${duracion}`, {
+        if (!id_cancha || !fecha) {
+            const err = new Error('Faltan parámetros para obtener horarios');
+            err.status = 400;
+            throw err;
+        }
+
+        const url = `${API_BASE_URL}/turnos/horarios-disponibles/${encodeURIComponent(id_cancha)}/${encodeURIComponent(fecha)}/${encodeURIComponent(duracion)}`;
+        const response = await fetch(url, {
             method: 'GET',
-            headers: getAuthHeaders()
+            // Este endpoint es público; evitamos headers innecesarios.
         });
 
         if (!response.ok) {
-            throw new Error('Error al obtener los horarios disponibles');
+            const errorData = await leerErrorRespuesta(response);
+            const err = new Error(errorData?.message || 'Error al obtener los horarios disponibles');
+            err.status = response.status;
+            err.data = errorData;
+            err.url = url;
+            throw err;
         }
 
         const data = await response.json();
