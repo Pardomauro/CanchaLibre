@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { obtenerEstadisticas } from '../../api/estadisticas';
 
 const AdminDashboard = () => {
-    const { user } = useAuth();
+    const navigate = useNavigate();
+    const { user, logout } = useAuth();
     const [estadisticas, setEstadisticas] = useState({
         canchasActivas: 0,
         reservasHoy: 0,
@@ -23,7 +24,7 @@ const AdminDashboard = () => {
         try {
             setLoading(true);
             setError('');
-            const response = await obtenerEstadisticas();
+            const response = await obtenerEstadisticas(user?.token);
             if (response.success) {
                 setEstadisticas(response.data);
             } else {
@@ -31,7 +32,13 @@ const AdminDashboard = () => {
             }
         } catch (err) {
             console.error('Error cargando estadísticas:', err);
-            setError('Error al conectar con el servidor');
+            if (err?.status === 401) {
+                setError('Sesión expirada o no autorizada. Volvé a iniciar sesión.');
+                logout();
+                navigate('/login', { replace: true });
+            } else {
+                setError(err?.message || 'Error al conectar con el servidor');
+            }
         } finally {
             setLoading(false);
         }
@@ -110,7 +117,7 @@ const AdminDashboard = () => {
                 </div>
             </div>
 
-                {/* Estadísticas rápidas */}
+            {/* Estadísticas rápidas */}
             <div className="mt-6 sm:mt-8 bg-white rounded-lg shadow-md p-4 sm:p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 space-y-2 sm:space-y-0">
                     <h3 className="text-base sm:text-lg font-semibold text-gray-800">Estadísticas Rápidas</h3>
@@ -146,9 +153,9 @@ const AdminDashboard = () => {
                         </div>
                         <div className="text-xs sm:text-sm text-gray-600">Reservas Hoy</div>
                         <div className="text-xs text-blue-600 mt-1 hidden sm:block">
-                            {new Date().toLocaleDateString('es-ES', { 
-                                day: 'numeric', 
-                                month: 'short' 
+                            {new Date().toLocaleDateString('es-ES', {
+                                day: 'numeric',
+                                month: 'short'
                             })}
                         </div>
                     </div>
@@ -165,9 +172,9 @@ const AdminDashboard = () => {
                         </div>
                         <div className="text-xs sm:text-sm text-gray-600">Ingresos del Mes</div>
                         <div className="text-xs text-yellow-600 mt-1 hidden sm:block">
-                            {new Date().toLocaleDateString('es-ES', { 
-                                month: 'long', 
-                                year: 'numeric' 
+                            {new Date().toLocaleDateString('es-ES', {
+                                month: 'long',
+                                year: 'numeric'
                             })}
                         </div>
                     </div>
@@ -219,19 +226,19 @@ const AdminDashboard = () => {
                         <div className="flex items-center justify-between">
                             <span className="text-xs sm:text-sm text-gray-600">Promedio por reserva</span>
                             <span className="text-xs sm:text-sm font-medium text-gray-800">
-                                ${estadisticas.reservasMes > 0 ? 
-                                    Math.round(estadisticas.ingresosMes / estadisticas.reservasMes).toLocaleString() : 
+                                ${estadisticas.reservasMes > 0 ?
+                                    Math.round(estadisticas.ingresosMes / estadisticas.reservasMes).toLocaleString() :
                                     '0'
                                 }
                             </span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2 mt-4">
-                            <div 
+                            <div
                                 className="bg-gradient-to-r from-green-400 to-blue-500 h-2 rounded-full transition-all duration-500"
                                 style={{ width: `${Math.min((estadisticas.ingresosMes / 50000) * 100, 100)}%` }}
                             ></div>
                         </div>
-                        
+
                     </div>
                 </div>
             </div>
@@ -240,8 +247,8 @@ const AdminDashboard = () => {
             <div className="mt-6 sm:mt-8 bg-blue-800 rounded-lg shadow-md p-4 sm:p-6 text-white">
                 <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Accesos Rápidos</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                    <Link 
-                        to="/reservas/historial" 
+                    <Link
+                        to="/reservas/historial"
                         className="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg p-3 sm:p-4 hover:bg-opacity-30 transition-all duration-200"
                     >
                         <div className="flex items-center">
@@ -254,8 +261,8 @@ const AdminDashboard = () => {
                             </div>
                         </div>
                     </Link>
-                    <Link 
-                        to="/admin/nueva-reserva" 
+                    <Link
+                        to="/admin/nueva-reserva"
                         className="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg p-3 sm:p-4 hover:bg-opacity-30 transition-all duration-200"
                     >
                         <div className="flex items-center">
@@ -268,8 +275,8 @@ const AdminDashboard = () => {
                             </div>
                         </div>
                     </Link>
-                    <Link 
-                        to="/canchas/crear" 
+                    <Link
+                        to="/canchas/crear"
                         className="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg p-3 sm:p-4 hover:bg-opacity-30 transition-all duration-200"
                     >
                         <div className="flex items-center">
