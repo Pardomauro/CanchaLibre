@@ -85,13 +85,13 @@ export default function NavBar() {
         };
     }, [isUserMenuOpen]);
 
-    // No mostrar navbar en la página de login
-    if (location.pathname === '/login') {
+    // No mostrar navbar en las páginas de autenticación
+    if (location.pathname === '/login' || location.pathname === '/registro' || location.pathname === '/recuperar-password') {
         return null;
     }
 
     return (
-        <nav className="sticky top-0 z-50 bg-blue-900/95 text-white shadow-lg shadow-black/10 backdrop-blur supports-[backdrop-filter]:bg-blue-900/80 border-b border-white/10">
+        <nav className="sticky top-0 z-50 bg-gradient-to-r from-[#588157] to-[#3A5A40] text-white shadow-lg shadow-black/10 backdrop-blur supports-[backdrop-filter]:bg-[#588157]/95 border-b border-white/10">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="flex h-16 items-center gap-3">
                     {/* Brand */}
@@ -100,15 +100,17 @@ export default function NavBar() {
                         className="flex items-center gap-3 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
                         aria-label="Ir al inicio"
                     >
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 ring-1 ring-white/10">
-                            <span className="text-lg" aria-hidden="true">🎾</span>
-                        </div>
+                        <img 
+                            src="/logoSaaS.png" 
+                            alt="Cancha Libre" 
+                            className="h-10 w-auto object-contain"
+                        />
                         <div className="leading-tight">
                             <div className="text-sm sm:text-base font-semibold tracking-tight">
-                                <span className="hidden sm:inline">Sistema Turnos Pádel</span>
-                                <span className="sm:hidden">Turnos Pádel</span>
+                                <span className="hidden sm:inline">Cancha Libre</span>
+                                <span className="sm:hidden">Cancha Libre</span>
                             </div>
-                            <div className="hidden sm:block text-xs text-white/70">Gestión de canchas y reservas</div>
+                            <div className="hidden sm:block text-xs text-white/70">Gestión de espacios deportivos</div>
                         </div>
                     </Link>
 
@@ -236,15 +238,17 @@ export default function NavBar() {
                     <div
                         ref={mobilePanelRef}
                         className={
-                            `fixed top-0 right-0 h-full w-80 max-w-sm md:hidden bg-blue-950 text-white shadow-2xl ring-1 ring-white/10 transform transition-transform duration-300 ease-out ` +
+                            `fixed top-0 right-0 h-full w-80 max-w-sm md:hidden bg-gradient-to-b from-[#3A5A40] to-[#344E41] text-white shadow-2xl ring-1 ring-white/10 transform transition-transform duration-300 ease-out ` +
                             (isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full')
                         }
                     >
                         <div className="flex items-center justify-between px-4 h-16 border-b border-white/10">
                             <div className="flex items-center gap-3">
-                                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 ring-1 ring-white/10">
-                                    <span className="text-lg" aria-hidden="true">🎾</span>
-                                </div>
+                                <img 
+                                    src="/logoSaaS.png" 
+                                    alt="Cancha Libre" 
+                                    className="h-9 w-auto object-contain"
+                                />
                                 <div>
                                     <div className="text-sm font-semibold">Menú</div>
                                     <div className="text-xs text-white/70">Navegación rápida</div>

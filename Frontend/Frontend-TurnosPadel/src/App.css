@@ -1,10 +1,5 @@
 /* Estilos generales de la aplicación */
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
+/* #root estilos removidos para permitir layouts de pantalla completa */
 
 /* Contenedor principal */
 .container {

@@ -6,9 +6,9 @@ import './App.css'
 function App() {
   return (
     <AuthProvider>
-      <div className="min-h-screen bg-gray-100">
+      <div className="min-h-screen">
         <NavBar />
-        <main className="container mx-auto">
+        <main>
           <RutasApp />
         </main>
       </div>
