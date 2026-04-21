@@ -514,7 +514,7 @@ router.post('/', [
                 // Crear usuario temporal si no existe
                 const passwordTemporal = Math.random().toString(36).slice(-8);
                 const [nuevoUsuario] = await pool.query(
-                    'INSERT INTO usuarios (nombre, email, contrasena, rol) VALUES (?, ?, ?, ?)',
+                    'INSERT INTO usuarios (nombre, email, password, rol) VALUES (?, ?, ?, ?)',
                     [nombre || 'Cliente', email, passwordTemporal, 'usuario']
                 );
                 idUsuarioFinal = nuevoUsuario.insertId;

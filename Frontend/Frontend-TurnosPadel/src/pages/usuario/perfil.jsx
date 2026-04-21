@@ -49,83 +49,157 @@ const Perfil = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold mb-6 text-center">Mi Perfil</h2>
-      
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
-      )}
-      
-      {success && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-          {success}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">
-            Nombre
-          </label>
-          <input
-            type="text"
-            name="nombre"
-            value={profile.nombre}
-            onChange={handleChange}
-            disabled={!isEditing}
-            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500 ${
-              !isEditing ? 'bg-gray-100' : ''
-            }`}
-          />
-        </div>
-        
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">
-            Email
-          </label>
-          <input
-            type="email"
-            name="email"
-            value={profile.email}
-            disabled
-            className="w-full px-3 py-2 border rounded-lg bg-gray-100"
-          />
-        </div>
-        
-
-
-        {!isEditing ? (
-          <button
-            type="button"
-            onClick={() => setIsEditing(true)}
-            className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            Editar Perfil
-          </button>
-        ) : (
-          <div className="flex gap-4">
-            <button
-              type="submit"
-              className="flex-1 bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-colors"
-            >
-              Guardar
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setIsEditing(false);
-                loadUserProfile(); // Recargar datos originales
-              }}
-              className="flex-1 bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition-colors"
-            >
-              Cancelar
-            </button>
+    <div className="min-h-screen w-full bg-gradient-to-br from-[#DAD7CD] to-[#A3B18A]">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        {/* Header Section */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-r from-[#588157] to-[#3A5A40] mb-4 shadow-lg">
+            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
           </div>
-        )}
-      </form>
+          <h1 className="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-[#588157] to-[#3A5A40] bg-clip-text text-transparent mb-2">
+            Mi Perfil
+          </h1>
+          <p className="text-gray-600 text-sm sm:text-base">
+            Gestiona tu información personal
+          </p>
+        </div>
 
+        {/* Profile Card */}
+        <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+              <div className="flex items-start">
+                <svg className="h-5 w-5 text-red-400 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+                <span className="text-sm">{error}</span>
+              </div>
+            </div>
+          )}
+          
+          {/* Success Message */}
+          {success && (
+            <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+              <div className="flex items-start">
+                <svg className="h-5 w-5 text-green-400 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <span className="text-sm">{success}</span>
+              </div>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Nombre Field */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5 text-[#588157]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  Nombre Completo
+                </div>
+              </label>
+              <input
+                type="text"
+                name="nombre"
+                value={profile.nombre}
+                onChange={handleChange}
+                disabled={!isEditing}
+                className={`w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm text-sm sm:text-base transition duration-200 ${
+                  !isEditing 
+                    ? 'bg-gray-50 text-gray-500 cursor-not-allowed' 
+                    : 'bg-white focus:outline-none focus:ring-2 focus:ring-[#588157] focus:border-transparent'
+                }`}
+                placeholder="Tu nombre completo"
+              />
+            </div>
+            
+            {/* Email Field */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5 text-[#588157]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  Correo Electrónico
+                </div>
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={profile.email}
+                disabled
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-gray-50 text-gray-500 cursor-not-allowed text-sm sm:text-base"
+                placeholder="ejemplo@correo.com"
+              />
+              <p className="mt-2 text-xs text-gray-500">
+                El correo electrónico no puede ser modificado
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="pt-4 border-t border-gray-200">
+              {!isEditing ? (
+                <button
+                  type="button"
+                  onClick={() => setIsEditing(true)}
+                  className="w-full flex justify-center items-center gap-2 bg-gradient-to-r from-[#588157] to-[#3A5A40] hover:from-[#3A5A40] hover:to-[#344E41] text-white py-3 px-4 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  Editar Perfil
+                </button>
+              ) : (
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    type="submit"
+                    className="flex-1 flex justify-center items-center gap-2 bg-gradient-to-r from-[#588157] to-[#3A5A40] hover:from-[#3A5A40] hover:to-[#344E41] text-white py-3 px-4 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Guardar Cambios
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsEditing(false);
+                      setSuccess('');
+                      setError('');
+                      loadUserProfile();
+                    }}
+                    className="flex-1 flex justify-center items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-700 py-3 px-4 rounded-lg font-semibold transition-all duration-200 shadow-sm hover:shadow-md"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Cancelar
+                  </button>
+                </div>
+              )}
+            </div>
+          </form>
+
+          {/* Additional Info */}
+          <div className="mt-8 pt-6 border-t border-gray-200">
+            <div className="bg-gradient-to-r from-[#DAD7CD]/30 to-[#A3B18A]/30 rounded-lg p-4">
+              <h3 className="text-sm font-semibold text-[#3A5A40] mb-2">
+                💡 Información
+              </h3>
+              <ul className="text-xs text-gray-600 space-y-1">
+                <li>• Tu información personal está protegida y segura</li>
+                <li>• Solo tú puedes ver y editar estos datos</li>
+                <li>• El correo es usado para notificaciones importantes</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

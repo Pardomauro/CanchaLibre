@@ -95,50 +95,97 @@ const HistorialReservas = () => {
 
     const obtenerColorEstado = (estado) => {
         switch (estado) {
-            case 'reservado': return 'bg-green-100 text-green-800';
-            case 'completado': return 'bg-blue-100 text-blue-800';
-            case 'cancelado': return 'bg-red-100 text-red-800';
-            default: return 'bg-gray-100 text-gray-800';
+            case 'reservado': return 'bg-[#588157] text-white border border-[#3A5A40]';
+            case 'completado': return 'bg-[#A3B18A] text-white border border-[#588157]';
+            case 'cancelado': return 'bg-rose-100 text-rose-800 border border-rose-200';
+            default: return 'bg-slate-100 text-slate-800 border border-slate-200';
         }
     };
 
     const renderDetallesReserva = (reserva, fecha, hora) => (
-        <div className={`grid gap-3 sm:gap-4 text-sm text-gray-600 ${isAdmin() ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'}`}>
-            {isAdmin() && (
-                <>
-                    <div className="min-w-0 text-center sm:text-left">
-                        <span className="font-medium">Usuario:</span>
-                        <br className="sm:hidden" />
-                        <span className="sm:ml-1 break-words">{reserva.nombre || reserva.nombre_usuario || 'Sin nombre'}</span>
+        <>
+            {/* Vista móvil optimizada */}
+            <div className="block sm:hidden space-y-3">
+                {isAdmin() && (
+                    <div className="bg-gradient-to-r from-[#DAD7CD]/20 to-[#A3B18A]/20 rounded-lg p-3 border border-[#588157]/10">
+                        <div className="flex items-start gap-2 mb-2">
+                            <span className="text-lg">👤</span>
+                            <div className="flex-1 min-w-0">
+                                <div className="text-xs font-semibold text-[#588157]/70 uppercase tracking-wide">Usuario</div>
+                                <div className="text-sm font-bold text-[#3A5A40] break-words">{reserva.nombre || reserva.nombre_usuario || 'Sin nombre'}</div>
+                                <div className="text-xs text-[#3A5A40]/70 break-all mt-0.5">{reserva.email || reserva.email_usuario || 'Sin email'}</div>
+                            </div>
+                        </div>
                     </div>
-                    <div className="min-w-0 col-span-1 sm:col-span-1 lg:col-span-2 xl:col-span-1 text-center sm:text-left">
-                        <span className="font-medium">Email:</span>
-                        <br className="sm:hidden" />
-                        <span className="sm:ml-1 text-xs break-all">{reserva.email || reserva.email_usuario || 'Sin email'}</span>
+                )}
+                
+                <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-gradient-to-br from-[#588157]/5 to-[#3A5A40]/5 rounded-lg p-3 border border-[#588157]/10">
+                        <div className="flex items-center gap-1.5 mb-1">
+                            <span className="text-base">📅</span>
+                            <span className="text-xs font-semibold text-[#588157]/70 uppercase tracking-wide">Fecha</span>
+                        </div>
+                        <div className="text-sm font-bold text-[#3A5A40] capitalize leading-tight">{fecha}</div>
                     </div>
-                </>
-            )}
-            <div className="text-center sm:text-left">
-                <span className="font-medium">Fecha:</span>
-                <br className="sm:hidden" />
-                <span className="sm:ml-1 capitalize">{fecha}</span>
+                    
+                    <div className="bg-gradient-to-br from-[#588157]/5 to-[#3A5A40]/5 rounded-lg p-3 border border-[#588157]/10">
+                        <div className="flex items-center gap-1.5 mb-1">
+                            <span className="text-base">🕐</span>
+                            <span className="text-xs font-semibold text-[#588157]/70 uppercase tracking-wide">Hora</span>
+                        </div>
+                        <div className="text-sm font-bold text-[#3A5A40] leading-tight">{hora}</div>
+                    </div>
+                    
+                    <div className="bg-gradient-to-br from-[#588157]/5 to-[#3A5A40]/5 rounded-lg p-3 border border-[#588157]/10">
+                        <div className="flex items-center gap-1.5 mb-1">
+                            <span className="text-base">⏱️</span>
+                            <span className="text-xs font-semibold text-[#588157]/70 uppercase tracking-wide">Duración</span>
+                        </div>
+                        <div className="text-sm font-bold text-[#3A5A40] leading-tight">{reserva.duracion} min</div>
+                    </div>
+                    
+                    <div className="bg-gradient-to-br from-[#A3B18A]/10 to-[#588157]/10 rounded-lg p-3 border border-[#588157]/20">
+                        <div className="flex items-center gap-1.5 mb-1">
+                            <span className="text-base">💰</span>
+                            <span className="text-xs font-semibold text-[#588157]/70 uppercase tracking-wide">Precio</span>
+                        </div>
+                        <div className="text-base font-extrabold text-[#588157] leading-tight">${reserva.precio?.toLocaleString()}</div>
+                    </div>
+                </div>
             </div>
-            <div className="text-center sm:text-left">
-                <span className="font-medium">Hora:</span>
-                <br className="sm:hidden" />
-                <span className="sm:ml-1">{hora}</span>
+            
+            {/* Vista desktop/tablet */}
+            <div className={`hidden sm:grid gap-3 sm:gap-4 text-sm text-[#3A5A40] ${isAdmin() ? 'grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6' : 'grid-cols-2 lg:grid-cols-4'}`}>
+                {isAdmin() && (
+                    <>
+                        <div className="min-w-0">
+                            <span className="font-medium">Usuario:</span>
+                            <span className="ml-1 break-words">{reserva.nombre || reserva.nombre_usuario || 'Sin nombre'}</span>
+                        </div>
+                        <div className="min-w-0 col-span-1 lg:col-span-2 xl:col-span-1">
+                            <span className="font-medium">Email:</span>
+                            <span className="ml-1 text-xs break-all">{reserva.email || reserva.email_usuario || 'Sin email'}</span>
+                        </div>
+                    </>
+                )}
+                <div>
+                    <span className="font-medium">Fecha:</span>
+                    <span className="ml-1 capitalize">{fecha}</span>
+                </div>
+                <div>
+                    <span className="font-medium">Hora:</span>
+                    <span className="ml-1">{hora}</span>
+                </div>
+                <div>
+                    <span className="font-medium">Duración:</span>
+                    <span className="ml-1">{reserva.duracion} min</span>
+                </div>
+                <div>
+                    <span className="font-medium">Precio:</span>
+                    <span className="ml-1">${reserva.precio?.toLocaleString()}</span>
+                </div>
             </div>
-            <div className="text-center sm:text-left">
-                <span className="font-medium">Duración:</span>
-                <br className="sm:hidden" />
-                <span className="sm:ml-1">{reserva.duracion} min</span>
-            </div>
-            <div className="text-center sm:text-left">
-                <span className="font-medium">Precio:</span>
-                <br className="sm:hidden" />
-                <span className="sm:ml-1">${reserva.precio?.toLocaleString()}</span>
-            </div>
-        </div>
+        </>
     );
 
     const filtrarReservas = (tipo) => {
@@ -176,28 +223,29 @@ const HistorialReservas = () => {
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center min-h-64">
-                <div className="text-lg">Cargando historial de reservas...</div>
+            <div className="min-h-screen w-full bg-gradient-to-br from-[#DAD7CD] to-[#A3B18A] flex justify-center items-center">
+                <div className="text-lg text-[#3A5A40] animate-pulse font-medium">Cargando historial de reservas...</div>
             </div>
         );
     }
 
     return (
-        <div className="max-w-6xl mx-auto mt-4 sm:mt-8 p-4 sm:p-6">
+        <div className="min-h-screen w-full bg-gradient-to-br from-[#DAD7CD] to-[#A3B18A]">
+            <div className="max-w-6xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8 lg:py-10 pb-8 sm:pb-12">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
-                <h2 className="text-xl sm:text-2xl font-bold">
+                <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-[#588157] to-[#3A5A40] bg-clip-text text-transparent">
                     {isAdmin() ? 'Todas las Reservas' : 'Mis Reservas'}
                     {reservas.length > 0 && (
-                        <span className="ml-2 text-sm font-normal text-gray-600">({reservas.length} total)</span>
+                        <span className="ml-2 text-sm font-normal text-[#3A5A40]">({reservas.length} total)</span>
                     )}
                 </h2>
-                <div className="flex gap-2">
+                <div className="flex gap-2 w-full sm:w-auto">
                     {isAdmin() && (
                         <Link 
                             to="/admin/nueva-reserva"
-                            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded text-sm sm:text-base"
+                            className="flex-1 sm:flex-none text-center bg-gradient-to-r from-[#588157] to-[#3A5A40] hover:from-[#3A5A40] hover:to-[#344E41] text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 text-sm sm:text-base font-medium"
                         >
-                            Nueva Reserva (Admin)
+                            ✨ Nueva Reserva
                         </Link>
                     )}
 
@@ -205,25 +253,30 @@ const HistorialReservas = () => {
             </div>
 
             {error && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                    {error}
+                <div className="bg-rose-50 border-l-4 border-rose-500 text-rose-800 px-4 py-3 rounded-lg mb-4 shadow-sm">
+                    <div className="flex items-center gap-2">
+                        <svg className="h-5 w-5 text-rose-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                        </svg>
+                        <span className="font-medium text-sm sm:text-base">{error}</span>
+                    </div>
                 </div>
             )}
 
             {reservas.length === 0 ? (
-                <div className="text-center py-12">
+                <div className="text-center py-8 sm:py-12 bg-white rounded-2xl shadow-xl">
                     <div className="mb-4">
-                        <svg className="mx-auto h-16 w-16 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 0V3a2 2 0 012-2h4a2 2 0 012 2v4M8 7l4 8 4-8m-4 8v1a2 2 0 01-2 2H9a2 2 0 01-2-2v-1m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v6.5" />
+                        <svg className="mx-auto h-16 w-16 sm:h-20 sm:w-20 text-[#A3B18A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 0V3a2 2 0 012-2h4a2 2 0 012 2v4M8 7l4 8 4-8m-4 8v1a2 2 0 01-2 2H9a2 2 0 01-2-2v-1m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v6.5" />
                         </svg>
                     </div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No tienes reservas</h3>
-                    <p className="text-gray-500 mb-4">¡Haz tu primera reserva ahora!</p>
+                    <h3 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-[#588157] to-[#3A5A40] bg-clip-text text-transparent mb-2">No tienes reservas</h3>
+                    <p className="text-[#3A5A40] mb-6 text-sm sm:text-base px-4">¡Haz tu primera reserva ahora!</p>
                     <Link 
                         to="/canchas"
-                        className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg inline-block"
+                        className="bg-gradient-to-r from-[#588157] to-[#3A5A40] hover:from-[#3A5A40] hover:to-[#344E41] text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-xl inline-block font-medium shadow-lg hover:shadow-xl transition-all duration-200 text-sm sm:text-base"
                     >
-                        Ver Canchas Disponibles
+                        🎾 Ver Canchas Disponibles
                     </Link>
                 </div>
             ) : (
@@ -231,51 +284,56 @@ const HistorialReservas = () => {
                     {/* Próximas reservas */}
                     {filtrarReservas('proximas').length > 0 && (
                         <div>
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
-                                <h3 className="text-lg font-semibold text-green-700">
-                                    Próximas Reservas ({filtrarReservas('proximas').length})
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-4">
+                                <h3 className="text-base sm:text-lg font-bold bg-gradient-to-r from-[#588157] to-[#3A5A40] bg-clip-text text-transparent">
+                                    🎾 Próximas Reservas ({filtrarReservas('proximas').length})
                                 </h3>
-                                <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full w-fit">
-                                    📅 Ordenadas por fecha (más próximas primero)
+                                <span className="text-xs font-medium text-[#3A5A40] bg-gradient-to-r from-[#DAD7CD]/30 to-[#A3B18A]/30 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full w-fit border border-[#588157]/20 shadow-sm">
+                                    📅 Ordenadas por fecha
                                 </span>
                             </div>
-                            <div className="grid gap-4">
+                            <div className="grid gap-3 sm:gap-4">
                                 {filtrarReservas('proximas').map((reserva) => {
                                     const { fecha, hora } = formatearFechaHora(reserva.fecha_turno);
                                     return (
-                                        <div key={reserva.id_turno} className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow p-4 sm:p-6">
-                                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                                                <div className="flex-1">
-                                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-3">
-                                                        <h4 className="text-lg font-semibold text-gray-900">
-                                                            Cancha {reserva.id_cancha}
+                                        <div key={reserva.id_turno} className="bg-white border-2 border-[#588157]/30 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+                                            {/* Header del card */}
+                                            <div className="bg-gradient-to-r from-[#588157]/10 to-[#3A5A40]/10 px-4 py-3 sm:px-6 sm:py-4 border-b border-[#588157]/20">
+                                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <h4 className="text-lg sm:text-xl font-extrabold bg-gradient-to-r from-[#588157] to-[#3A5A40] bg-clip-text text-transparent">
+                                                            🎾 Cancha {reserva.id_cancha}
                                                         </h4>
-                                                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${obtenerColorEstado(reserva.estado)}`}>
+                                                        <span className={`inline-flex px-2.5 py-1 text-xs font-bold rounded-full shadow-sm ${obtenerColorEstado(reserva.estado)}`}>
                                                             {reserva.estado.charAt(0).toUpperCase() + reserva.estado.slice(1)}
                                                         </span>
                                                     </div>
-                                                    
-                                                    {renderDetallesReserva(reserva, fecha, hora)}
+                                                    <span className="text-xs text-[#588157]/60 font-semibold">
+                                                        ID #{reserva.id_turno}
+                                                    </span>
                                                 </div>
+                                            </div>
+                                            
+                                            {/* Contenido del card */}
+                                            <div className="p-4 sm:p-6">
+                                                {renderDetallesReserva(reserva, fecha, hora)}
                                                 
-                                                <div className="flex flex-col sm:flex-row gap-2 min-w-fit">
-                                                    {isAdmin() && (
+                                                {/* Botón de eliminar (solo admin) */}
+                                                {isAdmin() && (
+                                                    <div className="mt-4 pt-4 border-t border-[#588157]/10">
                                                         <button
-                                                            className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                                                            className={`w-full sm:w-auto px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${
                                                                 eliminando === reserva.id_turno 
-                                                                    ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
-                                                                    : 'bg-red-700 hover:bg-red-800 text-white'
+                                                                    ? 'bg-slate-300 text-slate-500 cursor-not-allowed' 
+                                                                    : 'bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 text-white shadow-md hover:shadow-lg active:scale-95'
                                                             }`}
                                                             onClick={() => handleEliminarReserva(reserva)}
                                                             disabled={eliminando === reserva.id_turno}
                                                         >
-                                                            {eliminando === reserva.id_turno ? '⏳ Eliminando...' : 'Eliminar'}
+                                                            {eliminando === reserva.id_turno ? '⏳ Eliminando...' : '🗑️ Eliminar Reserva'}
                                                         </button>
-                                                    )}
-                                                    <span className="text-xs text-gray-500 sm:text-right">
-                                                        Reserva #{reserva.id_turno}
-                                                    </span>
-                                                </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     );
@@ -287,51 +345,56 @@ const HistorialReservas = () => {
                     {/* Historial (reservas pasadas) */}
                     {filtrarReservas('pasadas').length > 0 && (
                         <div>
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
-                                <h3 className="text-lg font-semibold text-gray-700">
-                                    Historial ({filtrarReservas('pasadas').length})
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-4">
+                                <h3 className="text-base sm:text-lg font-bold bg-gradient-to-r from-[#588157] to-[#3A5A40] bg-clip-text text-transparent">
+                                    📚 Historial ({filtrarReservas('pasadas').length})
                                 </h3>
-                                <span className="text-xs text-gray-600 bg-gray-50 px-2 py-1 rounded-full w-fit">
-                                    📅 Ordenadas por fecha (más recientes primero)
+                                <span className="text-xs font-medium text-[#3A5A40] bg-gradient-to-r from-[#DAD7CD]/30 to-[#A3B18A]/30 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full w-fit border border-[#588157]/20 shadow-sm">
+                                    📅 Más recientes primero
                                 </span>
                             </div>
-                            <div className="grid gap-4">
+                            <div className="grid gap-3 sm:gap-4">
                                 {filtrarReservas('pasadas').map((reserva) => {
                                     const { fecha, hora } = formatearFechaHora(reserva.fecha_turno);
                                     return (
-                                        <div key={reserva.id_turno} className="bg-gray-50 border border-gray-200 rounded-lg shadow-sm p-4 sm:p-6">
-                                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                                                <div className="flex-1">
-                                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-3">
-                                                        <h4 className="text-lg font-semibold text-gray-700">
+                                        <div key={reserva.id_turno} className="bg-white/90 border border-slate-300 rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 opacity-90 overflow-hidden">
+                                            {/* Header del card */}
+                                            <div className="bg-gradient-to-r from-slate-100 to-slate-50 px-4 py-3 sm:px-6 sm:py-4 border-b border-slate-200">
+                                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <h4 className="text-lg sm:text-xl font-bold text-[#3A5A40]">
                                                             Cancha {reserva.id_cancha}
                                                         </h4>
-                                                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${obtenerColorEstado(reserva.estado)}`}>
+                                                        <span className={`inline-flex px-2.5 py-1 text-xs font-bold rounded-full shadow-sm ${obtenerColorEstado(reserva.estado)}`}>
                                                             {reserva.estado.charAt(0).toUpperCase() + reserva.estado.slice(1)}
                                                         </span>
                                                     </div>
-                                                    
-                                                    {renderDetallesReserva(reserva, fecha, hora)}
+                                                    <span className="text-xs text-[#588157]/40 font-semibold">
+                                                        ID #{reserva.id_turno}
+                                                    </span>
                                                 </div>
+                                            </div>
+                                            
+                                            {/* Contenido del card */}
+                                            <div className="p-4 sm:p-6">
+                                                {renderDetallesReserva(reserva, fecha, hora)}
                                                 
-                                                <div className="flex flex-col sm:flex-row gap-2 min-w-fit">
-                                                    {isAdmin() && (
+                                                {/* Botón de eliminar (solo admin) */}
+                                                {isAdmin() && (
+                                                    <div className="mt-4 pt-4 border-t border-slate-200">
                                                         <button
-                                                            className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                                                            className={`w-full sm:w-auto px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${
                                                                 eliminando === reserva.id_turno 
-                                                                    ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
-                                                                    : 'bg-red-700 hover:bg-red-800 text-white'
+                                                                    ? 'bg-slate-300 text-slate-500 cursor-not-allowed' 
+                                                                    : 'bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 text-white shadow-md hover:shadow-lg active:scale-95'
                                                             }`}
                                                             onClick={() => handleEliminarReserva(reserva)}
                                                             disabled={eliminando === reserva.id_turno}
                                                         >
-                                                            {eliminando === reserva.id_turno ? '⏳ Eliminando...' : 'Eliminar'}
+                                                            {eliminando === reserva.id_turno ? '⏳ Eliminando...' : '🗑️ Eliminar Reserva'}
                                                         </button>
-                                                    )}
-                                                    <span className="text-xs text-gray-400 sm:text-right">
-                                                        Reserva #{reserva.id_turno}
-                                                    </span>
-                                                </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     );
@@ -351,15 +414,15 @@ const HistorialReservas = () => {
                     title="⚠️ Eliminar Reserva Definitivamente"
                     message={
                         <div className="space-y-4">
-                            <div className="border-l-4 border-red-500 pl-4">
-                                <h4 className="font-semibold text-red-800 mb-3">
+                            <div className="border-l-4 border-rose-500 pl-4">
+                                <h4 className="font-semibold text-rose-800 mb-3">
                                     ¿Estás seguro de eliminar esta reserva del sistema?
                                 </h4>
                                 
                                 {/* Información de la reserva */}
-                                <div className="bg-gray-50 p-3 rounded-lg mb-3">
-                                    <h5 className="font-medium text-gray-800 mb-2">Detalles de la Reserva:</h5>
-                                    <div className="space-y-1 text-sm text-gray-700">
+                                <div className="bg-[#DAD7CD]/30 p-3 rounded-lg mb-3 border border-[#A3B18A]/30">
+                                    <h5 className="font-medium text-[#3A5A40] mb-2">Detalles de la Reserva:</h5>
+                                    <div className="space-y-1 text-sm text-[#3A5A40]/80">
                                         <p><span className="font-medium">ID:</span> {reservaAEliminar.id_turno}</p>
                                         <p><span className="font-medium">Cancha:</span> Cancha {reservaAEliminar.id_cancha}</p>
                                         <p><span className="font-medium">Usuario:</span> {reservaAEliminar.nombre || reservaAEliminar.nombre_usuario || `ID: ${reservaAEliminar.id_usuario}`}</p>
@@ -374,9 +437,9 @@ const HistorialReservas = () => {
                                 </div>
 
                                 {/* Advertencias */}
-                                <div className="bg-red-50 p-3 rounded-lg">
-                                    <p className="font-medium text-red-800 mb-2">⚠️ Esta acción es IRREVERSIBLE</p>
-                                    <ul className="space-y-1 text-sm text-red-700">
+                                <div className="bg-rose-50 p-3 rounded-lg border border-rose-200">
+                                    <p className="font-medium text-rose-800 mb-2">⚠️ Esta acción es IRREVERSIBLE</p>
+                                    <ul className="space-y-1 text-sm text-rose-700">
                                         <li>• La reserva será eliminada permanentemente del sistema</li>
                                         <li>• Se perderá todo el historial asociado</li>
                                         <li>• El usuario será notificado automáticamente por email</li>
@@ -387,7 +450,7 @@ const HistorialReservas = () => {
                             </div>
                             
                             <div className="text-center pt-2">
-                                <p className="text-sm font-medium text-gray-800">
+                                <p className="text-sm font-medium text-[#3A5A40]">
                                     Solo los administradores pueden realizar esta acción crítica
                                 </p>
                             </div>
@@ -398,6 +461,7 @@ const HistorialReservas = () => {
                     type="danger"
                 />
             )}
+            </div>
         </div>
     );
 };

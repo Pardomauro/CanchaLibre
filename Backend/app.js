@@ -9,10 +9,13 @@ import 'dotenv/config';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Configuración de rate limiting
+// Configuración de rate limiting según el entorno
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutos
-    max: 100 // límite de 100 peticiones por ventana por IP
+    max: process.env.NODE_ENV === 'production' ? 100 : 500, // 500 en desarrollo, 100 en producción
+    message: 'Demasiadas peticiones desde esta IP, por favor intenta de nuevo más tarde.',
+    standardHeaders: true, // Devolver info del rate limit en headers `RateLimit-*`
+    legacyHeaders: false, // Deshabilitar headers `X-RateLimit-*`
 });
 
 // Middleware
