@@ -16,7 +16,7 @@ import GestionUsuarios from '../../pages/admin/GestionUsuarios';
 // Páginas de canchas
 import ListaCanchas from '../../pages/canchas/lista';
 import DetalleCancha from '../../pages/canchas/detalle';
-import CrearEditarCancha from '../../pages/canchas/crear-editar';
+import CrearEditarCancha from '../../pages/canchas/CrearEditar';
 
 // Páginas de reservas
 import HistorialReservas from '../../pages/reservas/HistorialReservas';
