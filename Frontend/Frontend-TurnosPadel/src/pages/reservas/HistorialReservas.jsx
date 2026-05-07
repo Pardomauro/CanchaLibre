@@ -102,7 +102,7 @@ const HistorialReservas = () => {
         }
     };
 
-    const renderDetallesReserva = (reserva, fecha, hora) => (
+    const renderDetallesReserva = (reserva, fecha, hora, celular) => (
         <>
             {/* Vista móvil optimizada */}
             <div className="block sm:hidden space-y-3">
@@ -114,6 +114,7 @@ const HistorialReservas = () => {
                                 <div className="text-xs font-semibold text-[#588157]/70 uppercase tracking-wide">Usuario</div>
                                 <div className="text-sm font-bold text-[#3A5A40] break-words">{reserva.nombre || reserva.nombre_usuario || 'Sin nombre'}</div>
                                 <div className="text-xs text-[#3A5A40]/70 break-all mt-0.5">{reserva.email || reserva.email_usuario || 'Sin email'}</div>
+                                <div className="text-xs text-[#3A5A40]/70 break-all mt-0.5">{reserva.celular || reserva.celular_usuario || 'Sin celular'}</div>
                             </div>
                         </div>
                     </div>
@@ -165,6 +166,10 @@ const HistorialReservas = () => {
                         <div className="min-w-0 col-span-1 lg:col-span-2 xl:col-span-1">
                             <span className="font-medium">Email:</span>
                             <span className="ml-1 text-xs break-all">{reserva.email || reserva.email_usuario || 'Sin email'}</span>
+                        </div>
+                        <div className="min-w-0 col-span-1 lg:col-span-2 xl:col-span-1">
+                            <span className="font-medium">Celular:</span>
+                            <span className="ml-1 text-xs break-all">{reserva.celular || reserva.celular_usuario || 'Sin celular'}</span>
                         </div>
                     </>
                 )}
@@ -245,7 +250,7 @@ const HistorialReservas = () => {
                             to="/admin/nueva-reserva"
                             className="flex-1 sm:flex-none text-center bg-gradient-to-r from-[#588157] to-[#3A5A40] hover:from-[#3A5A40] hover:to-[#344E41] text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 text-sm sm:text-base font-medium"
                         >
-                            ✨ Nueva Reserva
+                            + Nueva Reserva
                         </Link>
                     )}
 

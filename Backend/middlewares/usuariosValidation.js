@@ -13,6 +13,10 @@ export const validacionesRegistroUsuario = [
         .isEmail()
         .withMessage('Email inválido')
         .normalizeEmail(),
+    body('celular')
+        .trim()
+        .matches(/^\+?\d{7,15}$/)
+        .withMessage('Número de celular inválido. Debe contener entre 7 y 15 dígitos, opcionalmente comenzando con +'),
     body('password')
         .isLength({ min: 6 })
         .withMessage('La contraseña debe tener al menos 6 caracteres')
@@ -46,6 +50,10 @@ export const validacionesCrearUsuario = [
     body('email')
         .isEmail()
         .withMessage('Email inválido'),
+    body('celular')
+        .trim()
+        .matches(/^\+?\d{7,15}$/)
+        .withMessage('Número de celular inválido. Debe contener entre 7 y 15 dígitos, opcionalmente comenzando con +'),
     body('password')
         .isLength({ min: 6 })
         .withMessage('La contraseña debe tener al menos 6 caracteres')
@@ -78,6 +86,11 @@ export const validacionesActualizarUsuario = [
         .isEmail()
         .withMessage('Email inválido')
         .normalizeEmail(),
+    body('celular')
+        .optional()
+        .trim()
+        .matches(/^\+?\d{7,15}$/)
+        .withMessage('Número de celular inválido. Debe contener entre 7 y 15 dígitos, opcionalmente comenzando con +'),   
     body('password')
         .optional()
         .isLength({ min: 6 })

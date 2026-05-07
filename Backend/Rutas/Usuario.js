@@ -30,7 +30,8 @@ router.get('/', [
         const [rows] = await pool.query(`SELECT 
             id_usuario, 
             nombre,  
-            email 
+            email,
+            celular
             FROM usuarios
             ORDER BY id_usuario ASC
     `);
@@ -55,7 +56,7 @@ router.post('/', [
     validarCampos
 ], async (req, res) => {
     try {
-        const { nombre, email, password } = req.body;
+        const { nombre, email, celular, password } = req.body;
 
         // Verificar si el email ya existe
         const [existingUser] = await pool.query(
@@ -76,8 +77,8 @@ router.post('/', [
 
         // Insertar el nuevo usuario
         const [result] = await pool.query(
-            'INSERT INTO usuarios (nombre, email, password) VALUES (?, ?, ?)',
-            [nombre, email, hashedPassword]
+            'INSERT INTO usuarios (nombre, email, celular, password) VALUES (?, ?, ?, ?)',
+            [nombre, email, celular, hashedPassword]
         );
 
         res.status(201).json({
@@ -86,7 +87,8 @@ router.post('/', [
             data: {
                 id_usuario: result.insertId,
                 nombre,
-                email
+                email,
+                celular
             }
         });
 
@@ -138,10 +140,10 @@ router.post('/registrar', [
     validarCampos
 ], async (req, res) => {
     try {
-        const { nombre, email, password } = req.body;
+        const { nombre, email, celular, password } = req.body;
 
         // Validar que se proporcionen los campos necesarios
-        if (!nombre || !email || !password) {
+        if (!nombre || !email || !celular || !password) {
             return res.status(400).json({
                 success: false,
                 message: 'Todos los campos son obligatorios'
@@ -176,13 +178,13 @@ router.post('/registrar', [
 
         // Insertar el nuevo usuario en la base de datos 
         const [resultado] = await pool.execute(
-            'INSERT INTO usuarios (nombre, email, password) VALUES (?, ?, ?)',
-            [nombre.trim(), email.toLowerCase(), hashedPassword]
+            'INSERT INTO usuarios (nombre, email, celular, password) VALUES (?, ?, ?, ?)',
+            [nombre.trim(), email.toLowerCase(), celular.trim(), hashedPassword]
         );
 
         // Obtener datos del usuario creado sin su contraseña
         const [nuevoUsuario] = await pool.execute(
-            'SELECT id_usuario, nombre, email FROM usuarios WHERE id_usuario = ?',
+            'SELECT id_usuario, nombre, email, celular FROM usuarios WHERE id_usuario = ?',
             [resultado.insertId]
         );
 
@@ -276,7 +278,7 @@ router.put('/:id', [
 ], async (req, res) => {
     try {
         const { id } = req.params;
-        const { nombre, email, password } = req.body;
+        const { nombre, email, celular, password } = req.body;
 
         // Verificar que el usuario exista
         const [usuarioExistente] = await pool.execute(
@@ -292,7 +294,7 @@ router.put('/:id', [
         }
 
         // Validar que al menos un campo sea enviado para actualizar
-        const camposPermitidos = ['nombre', 'email', 'password'];
+        const camposPermitidos = ['nombre', 'email', 'celular', 'password'];
         if (!validarCamposActualizacion(req.body, camposPermitidos)) {
             return res.status(400).json({
                 success: false,
@@ -322,8 +324,8 @@ router.put('/:id', [
         }
 
         // Construir la consulta de actualización
-        let actualizarConsulta = 'UPDATE usuarios SET nombre = ?, email = ?';
-        const actualizarParametros = [nombre.trim(), email.toLowerCase()];
+        let actualizarConsulta = 'UPDATE usuarios SET nombre = ?, email = ?, celular = ?';
+        const actualizarParametros = [nombre.trim(), email.toLowerCase(), celular.trim()];
 
         // Verificar si se proporciona una nueva contraseña
         if (password) {

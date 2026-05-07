@@ -2,11 +2,16 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { registrarUsuario } from '../../api/auth';
 
+//import { validarEmail, validarCelular } from '../../utils/index';
+import { validarEmail, validarCelular } from '../../utils/validaciones.js';
+
+
 const Registro = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     nombre: '',
     email: '',
+    celular: '',
     password: '',
     confirmPassword: ''
   });
@@ -24,7 +29,7 @@ const Registro = () => {
   };
 
   const validateForm = () => {
-    if (!formData.nombre || !formData.email || !formData.password || !formData.confirmPassword) {
+    if (!formData.nombre || !formData.email || !formData.celular || !formData.password || !formData.confirmPassword) {
       setError('Todos los campos son obligatorios');
       return false;
     }
@@ -34,9 +39,13 @@ const Registro = () => {
       return false;
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
+    if (!validarEmail(formData.email)) {
       setError('El formato del email no es válido');
+      return false;
+    }
+
+    if (!validarCelular(formData.celular)) {
+      setError('El formato del celular no es válido');
       return false;
     }
 
@@ -77,10 +86,11 @@ const Registro = () => {
       console.log('Enviando datos de registro:', { 
         nombre: formData.nombre, 
         email: formData.email, 
+        celular: formData.celular,
         password: '***' 
       });
       
-      const response = await registrarUsuario(formData.nombre, formData.email, formData.password);
+      const response = await registrarUsuario(formData.nombre, formData.email, formData.celular, formData.password);
       
       console.log('Respuesta del servidor:', response);
       
@@ -161,6 +171,21 @@ const Registro = () => {
                 onChange={handleChange}
                 className="w-full px-3 py-2.5 sm:py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#588157] focus:border-transparent transition duration-200 text-sm sm:text-base"
                 placeholder="ejemplo@correo.com"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                Celular
+              </label>
+              <input
+                type="text"
+                name="celular"
+                value={formData.celular}
+                onChange={handleChange}
+                className="w-full px-3 py-2.5 sm:py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#588157] focus:border-transparent transition duration-200 text-sm sm:text-base"
+                placeholder="351------"
                 required
               />
             </div>

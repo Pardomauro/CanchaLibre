@@ -112,7 +112,7 @@ const inicializarDataBase = async () => {
                 fecha_turno DATETIME NOT NULL,
                 duracion INT NOT NULL, 
                 precio DECIMAL(10, 2) NOT NULL,
-                estado ENUM('reservado', 'cancelado', 'completado') NOT NULL DEFAULT 'reservado',
+                estado ENUM('pendiente de pago', 'reservado', 'cancelado', 'completado') NOT NULL DEFAULT 'reservado',
                 fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,

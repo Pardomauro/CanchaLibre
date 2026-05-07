@@ -1,3 +1,3 @@
 // Archivo de índice para facilitar las importaciones desde utils
 
-export * from './validaciones.js';
+export { validarEmail, validarCelular, validarFormatoFecha, validarFormatoHora, validarFormatoFechaHora, validarNumeroPositivo, validarLongitudMinima, validarDatosUsuario, validarDatosReserva, validarDatosCancha } from './validaciones';

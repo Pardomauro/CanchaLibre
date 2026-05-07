@@ -19,6 +19,7 @@ const GestionUsuarios = () => {
     const [formData, setFormData] = useState({
         nombre: '',
         email: '',
+        celular: '',
         password: ''
     });
 
@@ -72,7 +73,7 @@ const GestionUsuarios = () => {
             await crearUsuario(formData);
 
             // Limpiar formulario
-            setFormData({ nombre: '', email: '', password: '' });
+            setFormData({ nombre: '', email: '', celular: '', password: '' });
             setShowCreateForm(false);
 
             // Recargar usuarios
@@ -87,12 +88,13 @@ const GestionUsuarios = () => {
         }
     };
 
-    const handleEliminar = async (userId, nombreUsuario, emailUsuario) => {
+    const handleEliminar = async (userId, nombreUsuario, emailUsuario, celularUsuario) => {
         // Preparar datos para el modal de confirmación
         setUsuarioAEliminar({
             id_usuario: userId,
             nombre: nombreUsuario,
-            email: emailUsuario
+            email: emailUsuario,
+            celular: celularUsuario
         });
         setShowConfirmDelete(true);
     };
@@ -258,6 +260,27 @@ const GestionUsuarios = () => {
                                         required
                                     />
                                 </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    <span className="flex items-center gap-2">
+                                        <svg className="w-4 h-4 text-[#588157]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                        </svg>
+                                        Celular
+                                        <span className="text-red-500">*</span>
+                                    </span>
+                                </label>
+                                <input
+                                    type="text"
+                                    name="celular"
+                                    value={formData.celular}
+                                    onChange={handleInputChange}
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#588157] focus:border-transparent transition duration-200"
+                                    placeholder="Número de celular"
+                                    required
+                                />
                             </div>
 
                             <div>

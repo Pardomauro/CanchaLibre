@@ -19,6 +19,7 @@ import 'dotenv/config';
 async function crearUsuarioAdmin() {
     try {
         const adminEmail = process.env.ADMIN_EMAIL;
+        const adminCelular = process.env.ADMIN_CELULAR || '3515606326';
         const adminPassword = process.env.ADMIN_PASSWORD;
         const adminName = process.env.ADMIN_NAME || 'Administrador Sistema';
 

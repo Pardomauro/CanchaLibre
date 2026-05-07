@@ -36,14 +36,14 @@ export const loginUsuario = async (email, password) => {
 };
 
 // Función para gestión de Registro de Usuarios
-export const registrarUsuario = async (nombre, email, password) => {
+export const registrarUsuario = async (nombre, email, celular, password) => {
     try {
         const response = await fetch(`${API_BASE_URL}/usuarios/registrar`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ nombre, email, password })
+            body: JSON.stringify({ nombre, email, celular, password })
         });
 
         if (response.ok) {

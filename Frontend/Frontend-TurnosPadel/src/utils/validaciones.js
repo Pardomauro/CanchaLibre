@@ -11,6 +11,17 @@ export const validarEmail = (email) => {
 };
 
 /**
+ * Valida el celular (solo dígitos, longitud entre 7 y 15)
+ * @param {string} celular - Celular a validar
+ * @return {boolean} - true si el formato es válido, false en caso contrario
+ * Ejemplo de formato válido: 3515606326
+ */
+export const validarCelular = (celular) => {
+    const celularRegex = /^\d{7,15}$/;
+    return celularRegex.test(celular);
+};
+
+/**
  * Valida el formato de una fecha (YYYY-MM-DD)
  * @param {string} fecha - Fecha a validar
  * @returns {boolean} - true si el formato es válido, false en caso contrario
@@ -119,6 +130,10 @@ export const validarDatosReserva = (reserva) => {
 
     if (reserva.precio !== undefined && reserva.precio < 0) {
         errores.push('El precio debe ser un número positivo');
+    }
+
+    if (!reserva.celular || !validarCelular(reserva.celular)) {
+        errores.push('El celular es obligatorio y debe tener un formato válido');
     }
 
     const estadosPermitidos = ['reservado', 'cancelado', 'completado'];

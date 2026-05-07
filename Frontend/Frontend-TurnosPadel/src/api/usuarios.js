@@ -3,6 +3,7 @@
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
+// Normaliza el token para asegurar que no tenga espacios, comillas o prefijo "Bearer"
 const normalizarToken = (rawToken) => {
     if (rawToken === null || typeof rawToken === 'undefined') return null;
 
@@ -188,5 +189,5 @@ export const obtenerPerfilUsuario = async (id) => {
 };
 
 // Las funciones de validación están disponibles en ../utils
-// Importar validarDatosUsuario si necesitas validar datos antes de enviarlos
+// Importar validarDatosUsuario si se necesita validar datos antes de enviarlos
 
