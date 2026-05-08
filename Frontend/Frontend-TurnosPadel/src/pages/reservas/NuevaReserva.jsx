@@ -57,6 +57,16 @@ const NuevaReserva = ({
         }
     }, [formData.fecha, formData.duracion, formData.id_cancha]);
 
+    useEffect(() => {
+        if (!isAdmin) {
+            setFormData(prev => ({
+                ...prev,
+                email_usuario: user?.email || prev.email_usuario,
+                nombre_usuario: user?.nombre || prev.nombre_usuario,
+            }));
+        }
+    }, [isAdmin, user]);
+
     const cargarCanchaEspecifica = async () => {
         try {
             setLoadingCanchas(true);
@@ -183,7 +193,7 @@ const NuevaReserva = ({
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        
+
         // Si se cambia la cancha, actualizar también el precio
         if (name === 'id_cancha' && !canchaId) {
             const canchaSelecionada = canchas.find(c => c.id_cancha === parseInt(value));
@@ -299,7 +309,7 @@ const NuevaReserva = ({
             const fechaHora = `${formData.fecha} ${formData.hora}:00`;
 
             const reservaData = {
-                id_usuario: isAdmin ? null : (user?.userId || null),
+                id_usuario: isAdmin ? null : (user?.userId || user?.id || null),
                 id_cancha: parseInt(formData.id_cancha),
                 fecha_turno: fechaHora,
                 duracion: parseInt(formData.duracion),
@@ -570,36 +580,36 @@ const NuevaReserva = ({
                             </select>
                         </div>
 
-                            {/* Información adicional para el admin */}
-                            {isAdmin && formData.fecha && formData.id_cancha && (
-                                <div className="p-3 bg-gradient-to-r from-[#DAD7CD]/40 to-[#A3B18A]/40 rounded-lg border border-[#588157]/30">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <div className="flex items-center">
-                                            <svg className="w-4 h-4 text-[#588157] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
-                                            <span className="text-sm font-medium text-[#3A5A40]">Información de Disponibilidad</span>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                cargarHorariosDisponibles();
-                                                if (!canchaId) cargarCanchas();
-                                            }}
-                                            className="text-xs bg-[#A3B18A] hover:bg-[#588157] text-white px-2 py-1 rounded transition-colors font-semibold"
-                                            title="Recargar horarios actualizados"
-                                        >
-                                            🔄 Actualizar
-                                        </button>
+                        {/* Información adicional para el admin */}
+                        {isAdmin && formData.fecha && formData.id_cancha && (
+                            <div className="p-3 bg-gradient-to-r from-[#DAD7CD]/40 to-[#A3B18A]/40 rounded-lg border border-[#588157]/30">
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center">
+                                        <svg className="w-4 h-4 text-[#588157] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span className="text-sm font-medium text-[#3A5A40]">Información de Disponibilidad</span>
                                     </div>
-                                    <div className="text-xs text-[#3A5A40] space-y-1">
-                                        <p>• Horarios disponibles sin conflictos: {horariosDisponibles.length}</p>
-                                        <p>• Reservas existentes: {todasLasReservas.length}</p>
-                                        <p>• Duración seleccionada: {formData.duracion} minutos</p>
-                                        <p>• Como administrador, puedes crear reservas incluso en horarios ocupados</p>
-                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            cargarHorariosDisponibles();
+                                            if (!canchaId) cargarCanchas();
+                                        }}
+                                        className="text-xs bg-[#A3B18A] hover:bg-[#588157] text-white px-2 py-1 rounded transition-colors font-semibold"
+                                        title="Recargar horarios actualizados"
+                                    >
+                                        🔄 Actualizar
+                                    </button>
                                 </div>
-                            )}
+                                <div className="text-xs text-[#3A5A40] space-y-1">
+                                    <p>• Horarios disponibles sin conflictos: {horariosDisponibles.length}</p>
+                                    <p>• Reservas existentes: {todasLasReservas.length}</p>
+                                    <p>• Duración seleccionada: {formData.duracion} minutos</p>
+                                    <p>• Como administrador, puedes crear reservas incluso en horarios ocupados</p>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Campo Hora */}
                         <div>
@@ -734,8 +744,8 @@ const NuevaReserva = ({
                                 />
                             </div>
                             <p className="mt-1 text-xs text-gray-500">
-                                {isAdmin 
-                                    ? 'El precio se toma de la cancha seleccionada. Para modificarlo, edita la cancha.' 
+                                {isAdmin
+                                    ? 'El precio se toma de la cancha seleccionada. Para modificarlo, edita la cancha.'
                                     : 'Precio final de la reserva'}
                             </p>
                         </div>
@@ -776,7 +786,7 @@ const NuevaReserva = ({
                                 className={`w-full sm:flex-1 flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-lg shadow-md text-sm font-semibold text-white transition-all duration-200 ${loading
                                     ? 'bg-gray-400 cursor-not-allowed'
                                     : 'bg-gradient-to-r from-[#A3B18A] to-[#588157] hover:from-[#588157] hover:to-[#3A5A40] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#588157] transform hover:scale-[1.02]'
-                                }`}
+                                    }`}
                             >
                                 {loading ? (
                                     <>

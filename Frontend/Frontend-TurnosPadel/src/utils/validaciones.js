@@ -29,7 +29,7 @@ export const validarCelular = (celular) => {
 export const validarFormatoFecha = (fecha) => {
     const fechaRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!fechaRegex.test(fecha)) return false;
-    
+
     // Verificar que sea una fecha válida
     const fechaObj = new Date(fecha);
     return fechaObj instanceof Date && !isNaN(fechaObj.getTime());
@@ -53,7 +53,7 @@ export const validarFormatoHora = (hora) => {
 export const validarFormatoFechaHora = (fechaHora) => {
     const fechaHoraRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
     if (!fechaHoraRegex.test(fechaHora)) return false;
-    
+
     // Verificar que sea una fecha y hora válida
     const fechaObj = new Date(fechaHora);
     return fechaObj instanceof Date && !isNaN(fechaObj.getTime());
@@ -136,9 +136,9 @@ export const validarDatosReserva = (reserva) => {
         errores.push('El celular es obligatorio y debe tener un formato válido');
     }
 
-    const estadosPermitidos = ['reservado', 'cancelado', 'completado'];
+    const estadosPermitidos = ['pendiente de pago', 'reservado', 'cancelado', 'completado'];
     if (!reserva.estado || !estadosPermitidos.includes(reserva.estado)) {
-        errores.push('El estado debe ser: reservado, cancelado o completado');
+        errores.push('El estado debe ser: pendiente de pago, reservado, cancelado o completado');
     }
 
     return {

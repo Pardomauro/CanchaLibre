@@ -141,6 +141,27 @@ export const actualizarReserva = async (id, reserva) => {
     }
 };
 
+// Confirmar explícitamente una reserva pendiente y disparar el correo inmediato
+export const confirmarReserva = async (id) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/turnos/${id}/confirmar`, {
+            method: 'POST',
+            headers: getAuthHeaders()
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || 'Error al confirmar la reserva');
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+};
+
 // Función para eliminar una reserva (solo administrador)
 export const eliminarReserva = async (id) => {
     try {

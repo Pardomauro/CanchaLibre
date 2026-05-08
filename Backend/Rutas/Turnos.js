@@ -19,6 +19,78 @@ import { convertirFechaMySQL, validarDisponibilidadHorario, validarCamposActuali
 
 const router = express.Router();
 
+const formatearFechaReserva = (fechaEntrada) => {
+    if (!fechaEntrada) {
+        return { fechaTexto: 'Sin fecha', horaTexto: '' };
+    }
+
+    const fecha = fechaEntrada instanceof Date ? fechaEntrada : new Date(fechaEntrada);
+
+    if (Number.isNaN(fecha.getTime())) {
+        const fechaTexto = String(fechaEntrada);
+        const [fechaParte = fechaTexto, horaParte = ''] = fechaTexto.split(' ');
+        return { fechaTexto: fechaParte, horaTexto: horaParte };
+    }
+
+    return {
+        fechaTexto: fecha.toLocaleDateString('es-ES', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        }),
+        horaTexto: fecha.toLocaleTimeString('es-ES', {
+            hour: '2-digit',
+            minute: '2-digit'
+        })
+    };
+};
+
+const enviarCorreoConfirmacionReserva = async ({ email, nombre, id_cancha, fechaMysql, precio }) => {
+    if (!email || !email.includes('@')) {
+        return false;
+    }
+
+    const { fechaTexto, horaTexto } = formatearFechaReserva(fechaMysql);
+
+    await enviarCorreo({
+        destinatario: email,
+        asunto: 'Confirmación de Reserva',
+        contenidoHTML: `
+            <h1>Reserva Confirmada</h1>
+            <p>Hola ${nombre || 'Cliente'},</p>
+            <p>Tu reserva para la cancha ${id_cancha} ha sido confirmada.</p>
+            <ul>
+              <li><strong>Fecha:</strong> ${fechaTexto}</li>
+              <li><strong>Horario:</strong> ${horaTexto}</li>
+              <li><strong>Precio:</strong> $${precio}</li>
+            </ul>
+            <p>¡Gracias por elegirnos!</p>
+        `,
+    });
+
+    return true;
+};
+
+const obtenerEmailYNombreUsuario = async (idUsuario) => {
+    if (!idUsuario) {
+        return { email: null, nombre: null };
+    }
+
+    const [usuarios] = await pool.query(
+        'SELECT email, nombre FROM usuarios WHERE id_usuario = ?',
+        [idUsuario]
+    );
+
+    if (usuarios.length === 0) {
+        return { email: null, nombre: null };
+    }
+
+    return {
+        email: usuarios[0].email || null,
+        nombre: usuarios[0].nombre || null
+    };
+};
+
 // Ruta para obtener todos los turnos con paginación
 router.get('/', [
     protegerRuta,
@@ -173,7 +245,7 @@ router.get('/disponibilidad/:id_cancha/:fecha/:hora', [
 
         // Crear la fecha y hora completa
         const fechaHoraInicio = `${fecha} ${hora}:00`;
-        
+
         // Verificar si hay turnos en esa cancha y horario (considerando duraciones)
         const [turnos] = await pool.query(
             `SELECT id_turno, fecha_turno, duracion 
@@ -195,10 +267,10 @@ router.get('/disponibilidad/:id_cancha/:fecha/:hora', [
             const turnoInicio = new Date(turno.fecha_turno);
             const turnoFin = new Date(turnoInicio.getTime() + (turno.duracion * 60000)); // duracion en minutos
 
-            console.log('⏰ Comparando con turno:', { 
-                turnoInicio: turnoInicio, 
-                turnoFin: turnoFin, 
-                duracion: turno.duracion 
+            console.log('⏰ Comparando con turno:', {
+                turnoInicio: turnoInicio,
+                turnoFin: turnoFin,
+                duracion: turno.duracion
             });
 
             // Si el horario solicitado está dentro del rango de otro turno
@@ -255,11 +327,11 @@ const obtenerHorariosDisponiblesHandler = async (req, res) => {
             const horaInicio = 8; // 8:00 AM
             const horaFin = 24; // 12:00 AM (medianoche)
             const intervalos = duracionMinutos / 60; // Convertir a horas
-            
+
             for (let hora = horaInicio; hora < horaFin; hora += intervalos) {
                 const horaInicioStr = `${Math.floor(hora).toString().padStart(2, '0')}:${((hora % 1) * 60).toString().padStart(2, '0')}`;
                 let horaFinCalculada = hora + intervalos;
-                
+
                 // Manejar el caso especial de medianoche
                 let horaFinStr;
                 if (horaFinCalculada >= 24) {
@@ -267,13 +339,13 @@ const obtenerHorariosDisponiblesHandler = async (req, res) => {
                 } else {
                     horaFinStr = `${Math.floor(horaFinCalculada).toString().padStart(2, '0')}:${(((horaFinCalculada) % 1) * 60).toString().padStart(2, '0')}`;
                 }
-                
+
                 // Verificar que no se pase de la hora límite
                 if (hora + intervalos <= horaFin) {
                     horarios.push(`${horaInicioStr}-${horaFinStr}`);
                 }
             }
-            
+
             return horarios;
         };
 
@@ -300,7 +372,7 @@ const obtenerHorariosDisponiblesHandler = async (req, res) => {
 
             const fechaHoraCompleta = `${fecha} ${horaInicio}:00`;
             const horaInicioDate = new Date(fechaHoraCompleta);
-            
+
             let disponible = true;
 
             // Verificar si este horario está ocupado
@@ -469,11 +541,11 @@ router.post('/', [
         // Los administradores pueden crear reservas sin validar disponibilidad
         console.log('🔍 Usuario que crea la reserva:', req.usuario);
         console.log('🔍 Es administrador?:', req.usuario?.rol === 'administrador');
-        
+
         if (estado === 'reservado' && req.usuario?.rol !== 'administrador') {
             // Solo validar disponibilidad para usuarios normales
             const fechaSolo = fechaMysql.split(' ')[0]; // Extraer solo la fecha (YYYY-MM-DD)
-            
+
             const [turnosExistentes] = await pool.query(
                 `SELECT id_turno, fecha_turno, duracion 
                  FROM turnos 
@@ -499,14 +571,14 @@ router.post('/', [
         // Insertar el nuevo turno en la base de datos
         // Si no hay id_usuario (reserva de admin), buscar o crear usuario por email
         let idUsuarioFinal = id_usuario;
-        
+
         if (!idUsuarioFinal && email) {
             // Buscar usuario por email
             const [usuarioExistente] = await pool.query(
                 'SELECT id_usuario FROM usuarios WHERE email = ?',
                 [email]
             );
-            
+
             if (usuarioExistente.length > 0) {
                 idUsuarioFinal = usuarioExistente[0].id_usuario;
                 console.log('✅ Usuario encontrado por email:', email, '- ID:', idUsuarioFinal);
@@ -521,43 +593,52 @@ router.post('/', [
                 console.log('✅ Usuario creado temporalmente:', email, '- ID:', idUsuarioFinal);
             }
         }
-        
+
+        const esAdministrador = req.usuario?.rol === 'administrador';
+        const usuarioAutenticadoId = req.usuario?.id || req.usuario?.userId || null;
+
         // Si aún no hay id_usuario, usar el del admin actual
         if (!idUsuarioFinal) {
-            idUsuarioFinal = req.usuario?.userId || null;
+            idUsuarioFinal = usuarioAutenticadoId;
             console.log('⚠️ Usando ID del admin actual:', idUsuarioFinal);
         }
+
+        if (!idUsuarioFinal) {
+            return res.status(400).json({
+                success: false,
+                message: 'No se pudo determinar el usuario de la reserva'
+            });
+        }
+
+        const estadoFinal = esAdministrador ? estado : 'pendiente de pago';
 
         const [result] = await pool.query(`INSERT INTO turnos
             (id_usuario, id_cancha, fecha_turno, duracion, precio, estado)
             VALUES (?, ?, ?, ?, ?, ?)`,
-            [idUsuarioFinal, id_cancha, fechaMysql, duracion, precio, estado]);
+            [idUsuarioFinal, id_cancha, fechaMysql, duracion, precio, estadoFinal]);
 
-        // Enviar correo de confirmación solo si se proporciona email (sin bloquear la respuesta)
-        if (email && email.includes('@')) {
+        const debeEnviarConfirmacion = estadoFinal === 'reservado' && (email || isAdministrador);
+
+        // Enviar correo de confirmación solo cuando la reserva queda confirmada (sin bloquear la respuesta)
+        if (debeEnviarConfirmacion) {
             try {
-                await enviarCorreo({
-                    destinatario: email,
-                    asunto: 'Confirmación de Reserva',
-                    contenidoHTML: `
-                        <h1>Reserva Confirmada</h1>
-                        <p>Hola ${nombre || 'Cliente'},</p>
-                        <p>Tu reserva para la cancha ${id_cancha} ha sido confirmada.</p>
-                        <ul>
-                          <li><strong>Fecha:</strong> ${fechaMysql.split(' ')[0]}</li>
-                          <li><strong>Horario:</strong> ${fechaMysql.split(' ')[1]}</li>
-                          <li><strong>Precio:</strong> $${precio}</li>
-                        </ul>
-                        <p>¡Gracias por elegirnos!</p>
-                    `,
-                });
-                console.log('✅ Correo de confirmación enviado a:', email);
+                const emailDestinatario = email || null;
+                if (emailDestinatario) {
+                    await enviarCorreoConfirmacionReserva({
+                        email: emailDestinatario,
+                        nombre,
+                        id_cancha,
+                        fechaMysql,
+                        precio
+                    });
+                    console.log('✅ Correo de confirmación enviado a:', emailDestinatario);
+                }
             } catch (emailError) {
                 console.error('❌ Error enviando correo de confirmación:', emailError);
                 // Continuar sin fallar la creación del turno
             }
         } else {
-            console.log('ℹ️ No se envió correo de confirmación (email no proporcionado o inválido)');
+            console.log('ℹ️ No se envió correo de confirmación (reserva pendiente o email no disponible)');
         }
 
         res.status(201).json({
@@ -568,6 +649,96 @@ router.post('/', [
 
     } catch (error) {
         return manejarErrorServidor(error, 'crear turno', res);
+    }
+});
+
+// Ruta explícita para confirmar una reserva pendiente y enviar el correo al instante
+router.post('/:id/confirmar', [
+    protegerRuta,
+    verificarRol(['administrador']),
+    ...validacionesObtenerTurno,
+    validarCampos
+], async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const [turnoRows] = await pool.query(
+            `SELECT t.id_turno, t.id_usuario, t.id_cancha, t.fecha_turno, t.duracion, t.precio, t.estado,
+                    u.email as email_usuario, u.nombre as nombre_usuario
+             FROM turnos t
+             LEFT JOIN usuarios u ON t.id_usuario = u.id_usuario
+             WHERE t.id_turno = ?`,
+            [id]
+        );
+
+        if (turnoRows.length === 0) {
+            return res.status(404).json({
+                exito: false,
+                mensaje: 'Turno no encontrado'
+            });
+        }
+
+        const turnoAnterior = turnoRows[0];
+
+        if (turnoAnterior.estado === 'reservado') {
+            return res.status(200).json({
+                exito: true,
+                mensaje: 'La reserva ya estaba confirmada',
+                correo_enviado: false
+            });
+        }
+
+        await pool.query(
+            'UPDATE turnos SET estado = ?, fecha_actualizacion = NOW() WHERE id_turno = ?',
+            ['reservado', id]
+        );
+
+        const [turnoActualizadoRows] = await pool.query(
+            `SELECT t.id_turno, t.id_usuario, t.id_cancha, t.fecha_turno, t.duracion, t.precio, t.estado,
+                    u.email as email_usuario, u.nombre as nombre_usuario
+             FROM turnos t
+             LEFT JOIN usuarios u ON t.id_usuario = u.id_usuario
+             WHERE t.id_turno = ?`,
+            [id]
+        );
+
+        const turnoActualizado = turnoActualizadoRows[0] || turnoAnterior;
+        const emailYNombreFallback = await obtenerEmailYNombreUsuario(turnoActualizado.id_usuario);
+        const emailDestino = turnoActualizado.email_usuario || emailYNombreFallback.email;
+        const nombreDestino = turnoActualizado.nombre_usuario || emailYNombreFallback.nombre;
+        let correoEnviado = false;
+
+        console.log('🔁 Confirmación explícita de reserva:', {
+            id_turno: turnoActualizado.id_turno,
+            estado_anterior: turnoAnterior.estado,
+            estado_nuevo: turnoActualizado.estado,
+            email: emailDestino
+        });
+
+        if (emailDestino) {
+            try {
+                console.log('✉️ Enviando correo inmediato de confirmación...');
+                await enviarCorreoConfirmacionReserva({
+                    email: emailDestino,
+                    nombre: nombreDestino,
+                    id_cancha: turnoActualizado.id_cancha,
+                    fechaMysql: turnoActualizado.fecha_turno,
+                    precio: turnoActualizado.precio
+                });
+                correoEnviado = true;
+                console.log('✅ Correo inmediato enviado a:', emailDestino);
+            } catch (emailError) {
+                console.error('❌ Error enviando correo inmediato de confirmación:', emailError);
+            }
+        }
+
+        return res.status(200).json({
+            exito: true,
+            mensaje: 'Reserva confirmada exitosamente',
+            correo_enviado: correoEnviado
+        });
+    } catch (error) {
+        return manejarErrorServidor(error, 'confirmar reserva', res);
     }
 });
 
@@ -582,6 +753,24 @@ router.put('/:id', [
     try {
         const { id } = req.params;
         const { id_usuario, id_cancha, fecha_turno, duracion, precio, estado } = req.body;
+
+        const [turnoAnteriorRows] = await pool.query(
+            `SELECT t.id_turno, t.id_usuario, t.id_cancha, t.fecha_turno, t.duracion, t.precio, t.estado,
+                    u.email as email_usuario, u.nombre as nombre_usuario
+             FROM turnos t
+             LEFT JOIN usuarios u ON t.id_usuario = u.id_usuario
+             WHERE t.id_turno = ?`,
+            [id]
+        );
+
+        if (turnoAnteriorRows.length === 0) {
+            return res.status(404).json({
+                exito: false,
+                mensaje: 'Turno no encontrado'
+            });
+        }
+
+        const turnoAnterior = turnoAnteriorRows[0];
 
         // Construir dinámicamente la consulta de actualización
         const campos = [];
@@ -631,6 +820,41 @@ router.put('/:id', [
                 exito: false,
                 mensaje: 'Turno no encontrado'
             });
+        }
+
+        const [turnoActualizadoRows] = await pool.query(
+            `SELECT t.id_turno, t.id_usuario, t.id_cancha, t.fecha_turno, t.duracion, t.precio, t.estado,
+                    u.email as email_usuario, u.nombre as nombre_usuario
+             FROM turnos t
+             LEFT JOIN usuarios u ON t.id_usuario = u.id_usuario
+             WHERE t.id_turno = ?`,
+            [id]
+        );
+
+        const turnoActualizado = turnoActualizadoRows[0] || turnoAnterior;
+        const emailYNombreFallback = await obtenerEmailYNombreUsuario(turnoActualizado.id_usuario);
+        const emailDestino = turnoActualizado.email_usuario || emailYNombreFallback.email;
+        const nombreDestino = turnoActualizado.nombre_usuario || emailYNombreFallback.nombre;
+
+        const cambioAConfirmado = turnoAnterior.estado === 'pendiente de pago' && turnoActualizado.estado === 'reservado';
+        console.log('🔁 Estado anterior:', turnoAnterior.estado, '-> Estado actualizado:', turnoActualizado.estado);
+        console.log('📧 Email objetivo al confirmar:', emailDestino);
+        if (cambioAConfirmado) {
+            try {
+                console.log('✉️ Intentando enviar correo de confirmación...');
+                const enviado = await enviarCorreoConfirmacionReserva({
+                    email: emailDestino,
+                    nombre: nombreDestino,
+                    id_cancha: turnoActualizado.id_cancha,
+                    fechaMysql: turnoActualizado.fecha_turno,
+                    precio: turnoActualizado.precio
+                });
+                console.log('✅ Resultado envío confirmación:', enviado, '-> destinatario:', emailDestino);
+            } catch (emailError) {
+                console.error('❌ Error enviando correo al confirmar turno:', emailError);
+            }
+        } else {
+            console.log('ℹ️ No se cumplió la condición de cambio a confirmado (no se envía correo).');
         }
 
         res.json({

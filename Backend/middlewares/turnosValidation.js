@@ -112,7 +112,7 @@ export const validacionesCrearTurno = [
             console.log('📅 Fecha turno:', fecha);
             console.log('📅 Ahora:', ahora);
             console.log('📅 Es pasado?:', fecha < ahora);
-            
+
             // Comentamos temporalmente esta validación para permitir al admin crear reservas
             // if (fecha < ahora) {
             //     throw new Error('La fecha del turno no puede ser en el pasado');
@@ -138,7 +138,7 @@ export const validacionesCrearTurno = [
             return true;
         }),
     body('estado')
-        .isIn(['reservado', 'cancelado', 'completado'])
+        .isIn(['pendiente de pago', 'reservado', 'cancelado', 'completado'])
         .withMessage('Estado inválido'),
     body('email')
         .optional()
@@ -189,7 +189,7 @@ export const validacionesActualizarTurno = [
         .withMessage('El precio debe ser un número positivo'),
     body('estado')
         .optional()
-        .isIn(['reservado', 'cancelado', 'completado'])
+        .isIn(['pendiente de pago', 'reservado', 'cancelado', 'completado'])
         .withMessage('Estado inválido')
 ];
 
