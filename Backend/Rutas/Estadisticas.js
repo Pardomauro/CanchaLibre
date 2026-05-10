@@ -1,5 +1,5 @@
 import express from 'express';
-import { pool } from '../Config/db.js';
+import { pool } from '../config/db.js';
 import { protegerRuta } from '../Servicios/token.js';
 
 const router = express.Router();

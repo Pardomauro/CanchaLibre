@@ -1,9 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { registrarUsuario } from '../../api/auth';
-
-//import { validarEmail, validarCelular } from '../../utils/index';
-import { validarEmail, validarCelular } from '../../utils/validaciones.js';
+import { validarEmail, validarCelular } from '../../utils/index';
 
 
 const Registro = () => {
