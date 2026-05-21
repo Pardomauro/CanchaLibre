@@ -105,13 +105,17 @@ npm run test:email    # Test de configuración email
 
 ### **Usuarios**
 - `GET /api/usuarios` - Obtener todos los usuarios (Admin)
+- `GET /api/usuarios/:id` - Obtener usuario específico
 - `POST /api/usuarios` - Crear usuario (Admin)
+- `PUT /api/usuarios/:id` - Actualizar usuario
 - `DELETE /api/usuarios/:id` - Eliminar usuario (Admin)
 
 ### **Canchas**
 - `GET /api/canchas` - Listar todas las canchas
 - `GET /api/canchas/:id` - Obtener cancha específica
+- `GET /api/canchas/disponibles` - Obtener solo canchas disponibles (no en mantenimiento)
 - `POST /api/canchas` - Crear cancha (Admin)
+- `POST /api/canchas/turnos/disponibilidad` - Verificar disponibilidad de cancha
 - `PUT /api/canchas/:id` - Editar cancha (Admin)
 - `DELETE /api/canchas/:id` - Eliminar cancha (Admin)
 
@@ -120,9 +124,11 @@ npm run test:email    # Test de configuración email
 - `GET /api/turnos/usuario/:id` - Reservas de un usuario
 - `GET /api/turnos/:id` - Obtener reserva específica
 - `GET /api/turnos/disponibilidad/:id_cancha/:fecha/:hora` - Verificar disponibilidad
-- `GET /api/turnos/horarios-disponibles/:id_cancha/:fecha/:duracion` - Horarios disponibles
+- `GET /api/turnos/horarios-disponibles/:id_cancha/:fecha/:duracion` - Horarios disponibles con duración específica
+- `GET /api/turnos/horarios-disponibles/:id_cancha/:fecha` - Horarios disponibles (60 min por defecto)
 - `GET /api/turnos/fecha/:fecha` - Reservas por fecha
 - `POST /api/turnos` - Crear reserva
+- `POST /api/turnos/:id/confirmar` - Confirmar reserva pendiente (Admin)
 - `PUT /api/turnos/:id` - Actualizar reserva
 - `DELETE /api/turnos/:id` - Eliminar reserva (Admin)
 
