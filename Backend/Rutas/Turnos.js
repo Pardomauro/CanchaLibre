@@ -569,38 +569,62 @@ router.post('/', [
 
 
         // Insertar el nuevo turno en la base de datos
-        // Si no hay id_usuario (reserva de admin), buscar o crear usuario por email
-        let idUsuarioFinal = id_usuario;
-
-        if (!idUsuarioFinal && email) {
-            // Buscar usuario por email
-            const [usuarioExistente] = await pool.query(
-                'SELECT id_usuario FROM usuarios WHERE email = ?',
-                [email]
-            );
-
-            if (usuarioExistente.length > 0) {
-                idUsuarioFinal = usuarioExistente[0].id_usuario;
-                console.log('✅ Usuario encontrado por email:', email, '- ID:', idUsuarioFinal);
-            } else {
-                // Crear usuario temporal si no existe
-                const passwordTemporal = Math.random().toString(36).slice(-8);
-                const [nuevoUsuario] = await pool.query(
-                    'INSERT INTO usuarios (nombre, email, password, rol) VALUES (?, ?, ?, ?)',
-                    [nombre || 'Cliente', email, passwordTemporal, 'usuario']
-                );
-                idUsuarioFinal = nuevoUsuario.insertId;
-                console.log('✅ Usuario creado temporalmente:', email, '- ID:', idUsuarioFinal);
-            }
-        }
-
+        // Determinar el usuario final según el rol
+        let idUsuarioFinal = null;
         const esAdministrador = req.usuario?.rol === 'administrador';
         const usuarioAutenticadoId = req.usuario?.id || req.usuario?.userId || null;
 
-        // Si aún no hay id_usuario, usar el del admin actual
-        if (!idUsuarioFinal) {
+        if (esAdministrador) {
+            // ADMINISTRADOR: puede crear reservas para otros usuarios
+            if (email) {
+                // Buscar usuario por email
+                const [usuarioExistente] = await pool.query(
+                    'SELECT id_usuario FROM usuarios WHERE email = ?',
+                    [email]
+                );
+
+                if (usuarioExistente.length > 0) {
+                    idUsuarioFinal = usuarioExistente[0].id_usuario;
+                    console.log('✅ Admin - Usuario encontrado por email:', email, '- ID:', idUsuarioFinal);
+                } else {
+                    // Crear usuario temporal si no existe
+                    const passwordTemporal = Math.random().toString(36).slice(-8);
+                    const [nuevoUsuario] = await pool.query(
+                        'INSERT INTO usuarios (nombre, email, password, rol) VALUES (?, ?, ?, ?)',
+                        [nombre || 'Cliente', email, passwordTemporal, 'usuario']
+                    );
+                    idUsuarioFinal = nuevoUsuario.insertId;
+                    console.log('✅ Admin - Usuario creado temporalmente:', email, '- ID:', idUsuarioFinal);
+                }
+            } else if (id_usuario) {
+                idUsuarioFinal = id_usuario;
+            } else {
+                idUsuarioFinal = usuarioAutenticadoId;
+            }
+        } else {
+            // USUARIO NORMAL: solo puede crear reservas para sí mismo
             idUsuarioFinal = usuarioAutenticadoId;
-            console.log('⚠️ Usando ID del admin actual:', idUsuarioFinal);
+            
+            // Validar que el email proporcionado corresponda al usuario autenticado
+            if (email && usuarioAutenticadoId) {
+                const [usuarioAuth] = await pool.query(
+                    'SELECT email FROM usuarios WHERE id_usuario = ?',
+                    [usuarioAutenticadoId]
+                );
+                
+                if (usuarioAuth.length > 0) {
+                    const emailRegistrado = usuarioAuth[0].email.toLowerCase();
+                    const emailIngresado = email.toLowerCase();
+                    
+                    if (emailRegistrado !== emailIngresado) {
+                        return res.status(400).json({
+                            success: false,
+                            message: 'El email proporcionado no corresponde a tu usuario. Usá el email con el que te registraste.'
+                        });
+                    }
+                    console.log('✅ Email validado correctamente para usuario:', emailIngresado);
+                }
+            }
         }
 
         if (!idUsuarioFinal) {
@@ -617,7 +641,7 @@ router.post('/', [
             VALUES (?, ?, ?, ?, ?, ?)`,
             [idUsuarioFinal, id_cancha, fechaMysql, duracion, precio, estadoFinal]);
 
-        const debeEnviarConfirmacion = estadoFinal === 'reservado' && (email || isAdministrador);
+        const debeEnviarConfirmacion = estadoFinal === 'reservado' && (email || esAdministrador);
 
         // Enviar correo de confirmación solo cuando la reserva queda confirmada (sin bloquear la respuesta)
         if (debeEnviarConfirmacion) {

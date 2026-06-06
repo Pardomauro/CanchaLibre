@@ -112,16 +112,21 @@ export const validarDatosUsuario = (usuario) => {
 export const validarDatosReserva = (reserva) => {
     const errores = [];
 
-    if (!reserva.id_usuario || isNaN(reserva.id_usuario)) {
+    /* if (!reserva.id_usuario || isNaN(reserva.id_usuario)) {
         errores.push('ID de usuario inválido');
-    }
-
+    } */
+   
     if (!reserva.id_cancha || isNaN(reserva.id_cancha)) {
         errores.push('ID de cancha inválido');
     }
 
     if (!reserva.fecha_turno || !validarFormatoFechaHora(reserva.fecha_turno)) {
         errores.push('Fecha y hora del turno son obligatorias y deben tener formato válido (YYYY-MM-DD HH:MM:SS)');
+    }
+
+    // Valida que el gmail que se ingrese corresponda a un usuario existente en la base de datos
+    if (!reserva.email || !validarEmail(reserva.email, usuarios)) {
+        errores.push('El email no corresponde a un usuario existente');
     }
 
     if (!reserva.duracion || !validarNumeroPositivo(reserva.duracion)) {
@@ -132,10 +137,11 @@ export const validarDatosReserva = (reserva) => {
         errores.push('El precio debe ser un número positivo');
     }
 
-    if (!reserva.celular || !validarCelular(reserva.celular)) {
-        errores.push('El celular es obligatorio y debe tener un formato válido');
+    // Celular opcional: si se proporciona, validar formato
+    if (reserva.celular && !validarCelular(reserva.celular)) {
+        errores.push('El celular debe tener un formato válido si se proporciona');
     }
-
+ 
     const estadosPermitidos = ['pendiente de pago', 'reservado', 'cancelado', 'completado'];
     if (!reserva.estado || !estadosPermitidos.includes(reserva.estado)) {
         errores.push('El estado debe ser: pendiente de pago, reservado, cancelado o completado');
