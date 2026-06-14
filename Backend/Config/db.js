@@ -60,6 +60,7 @@ const inicializarDataBase = async () => {
                 precio DECIMAL(10, 2) NOT NULL,
                 en_mantenimiento BOOLEAN NOT NULL DEFAULT false,
                 horarios_disponibles JSON NOT NULL,
+                tipo_cancha ENUM('Futbol', 'Padel', 'Tenis', 'Otra') NOT NULL,
                 fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             )
@@ -125,6 +126,7 @@ const inicializarDataBase = async () => {
                 fecha_turno DATETIME NOT NULL,
                 duracion INT NOT NULL, 
                 precio DECIMAL(10, 2) NOT NULL,
+                tipo_cancha ENUM('Futbol', 'Padel', 'Tenis', 'Otra') NOT NULL,
                 estado ENUM('pendiente de pago', 'reservado', 'cancelado', 'completado') NOT NULL DEFAULT 'reservado',
                 fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -132,6 +134,19 @@ const inicializarDataBase = async () => {
                 FOREIGN KEY (id_cancha) REFERENCES canchas(id) ON DELETE CASCADE
             )
         `);
+
+        // Asegurar que la columna tipo_cancha exista en turnos
+        try {
+            await connection.execute(`
+                ALTER TABLE turnos 
+                ADD COLUMN tipo_cancha ENUM('Futbol', 'Padel', 'Tenis', 'Otra') NOT NULL DEFAULT 'Padel';
+            `);
+        } catch (error) {
+            // Si la columna ya existe, ignorar el error
+            if (error.code !== 'ER_DUP_FIELDNAME') {
+                throw error;
+            }
+        }
 
         // Asegurar que la columna estado de turnos soporte el nuevo estado pendiente
         try {
@@ -196,8 +211,8 @@ const inicializarDataBase = async () => {
 
             for (const cancha of canchasPrueba) {
                 await connection.execute(
-                    'INSERT INTO canchas (precio, en_mantenimiento, horarios_disponibles) VALUES (?, ?, ?)',
-                    [cancha.precio, cancha.en_mantenimiento, cancha.horarios]
+                    'INSERT INTO canchas (precio, en_mantenimiento, horarios_disponibles, tipo_cancha) VALUES (?, ?, ?, ?)',
+                    [cancha.precio, cancha.en_mantenimiento, cancha.horarios, 'Padel']
                 );
             }
 

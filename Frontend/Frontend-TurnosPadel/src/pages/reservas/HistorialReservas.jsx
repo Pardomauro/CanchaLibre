@@ -164,6 +164,13 @@ const HistorialReservas = () => {
                 <div className="grid grid-cols-2 gap-2">
                     <div className="bg-gradient-to-br from-[#588157]/5 to-[#3A5A40]/5 rounded-lg p-3 border border-[#588157]/10">
                         <div className="flex items-center gap-1.5 mb-1">
+                            <span className="text-base">🎾</span>
+                            <span className="text-xs font-semibold text-[#588157]/70 uppercase tracking-wide">Tipo de Cancha</span>
+                        </div>
+                        <div className="text-sm font-bold text-[#3A5A40] capitalize leading-tight">{reserva.tipo_cancha || 'No especificado'}</div>
+                    </div>
+                    <div className="bg-gradient-to-br from-[#588157]/5 to-[#3A5A40]/5 rounded-lg p-3 border border-[#588157]/10">
+                        <div className="flex items-center gap-1.5 mb-1">
                             <span className="text-base">📅</span>
                             <span className="text-xs font-semibold text-[#588157]/70 uppercase tracking-wide">Fecha</span>
                         </div>
@@ -214,6 +221,10 @@ const HistorialReservas = () => {
                         </div>
                     </>
                 )}
+                <div>
+                    <span className="font-medium">Tipo de Cancha:</span>
+                    <span className="ml-1 capitalize">{reserva.tipo_cancha || 'No especificado'}</span>
+                </div>
                 <div>
                     <span className="font-medium">Fecha:</span>
                     <span className="ml-1 capitalize">{fecha}</span>
@@ -346,6 +357,7 @@ const HistorialReservas = () => {
                                                 {/* Header del card */}
                                                 <div className="bg-gradient-to-r from-[#588157]/10 to-[#3A5A40]/10 px-4 py-3 sm:px-6 sm:py-4 border-b border-[#588157]/20">
                                                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+
                                                         <div className="flex items-center gap-2">
                                                             <h4 className="text-lg sm:text-xl font-extrabold bg-gradient-to-r from-[#588157] to-[#3A5A40] bg-clip-text text-transparent">
                                                                 🎾 Cancha {reserva.id_cancha}
@@ -354,6 +366,7 @@ const HistorialReservas = () => {
                                                                 {reserva.estado.charAt(0).toUpperCase() + reserva.estado.slice(1)}
                                                             </span>
                                                         </div>
+
                                                         <span className="text-xs text-[#588157]/60 font-semibold">
                                                             ID #{reserva.id_turno}
                                                         </span>
@@ -370,8 +383,8 @@ const HistorialReservas = () => {
                                                             {reserva.estado === 'pendiente de pago' && (
                                                                 <button
                                                                     className={`w-full sm:w-auto px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 mr-0 sm:mr-3 mb-2 sm:mb-0 ${confirmando === reserva.id_turno
-                                                                            ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                                                                            : 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-md hover:shadow-lg active:scale-95'
+                                                                        ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                                                                        : 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-md hover:shadow-lg active:scale-95'
                                                                         }`}
                                                                     onClick={() => handleConfirmarReserva(reserva)}
                                                                     disabled={confirmando === reserva.id_turno}
@@ -381,8 +394,8 @@ const HistorialReservas = () => {
                                                             )}
                                                             <button
                                                                 className={`w-full sm:w-auto px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${eliminando === reserva.id_turno
-                                                                        ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                                                                        : 'bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 text-white shadow-md hover:shadow-lg active:scale-95'
+                                                                    ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                                                                    : 'bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 text-white shadow-md hover:shadow-lg active:scale-95'
                                                                     }`}
                                                                 onClick={() => handleEliminarReserva(reserva)}
                                                                 disabled={eliminando === reserva.id_turno}
@@ -442,8 +455,8 @@ const HistorialReservas = () => {
                                                             {reserva.estado === 'pendiente de pago' && (
                                                                 <button
                                                                     className={`w-full sm:w-auto px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 mr-0 sm:mr-3 mb-2 sm:mb-0 ${confirmando === reserva.id_turno
-                                                                            ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                                                                            : 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-md hover:shadow-lg active:scale-95'
+                                                                        ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                                                                        : 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-md hover:shadow-lg active:scale-95'
                                                                         }`}
                                                                     onClick={() => handleConfirmarReserva(reserva)}
                                                                     disabled={confirmando === reserva.id_turno}
@@ -453,8 +466,8 @@ const HistorialReservas = () => {
                                                             )}
                                                             <button
                                                                 className={`w-full sm:w-auto px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${eliminando === reserva.id_turno
-                                                                        ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                                                                        : 'bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 text-white shadow-md hover:shadow-lg active:scale-95'
+                                                                    ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                                                                    : 'bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 text-white shadow-md hover:shadow-lg active:scale-95'
                                                                     }`}
                                                                 onClick={() => handleEliminarReserva(reserva)}
                                                                 disabled={eliminando === reserva.id_turno}

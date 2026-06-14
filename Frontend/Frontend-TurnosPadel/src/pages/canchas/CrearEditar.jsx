@@ -26,6 +26,7 @@ export default function CrearEditarCancha() {
     const [cancha, setCancha] = useState({
         precio: '',
         en_mantenimiento: false,
+        tipo_cancha: 'Padel',
         horarios_disponibles: [
             "08:00-09:30", "09:30-11:00", "11:00-12:30", 
             "12:30-14:00", "14:00-15:30", "15:30-17:00", 
@@ -76,6 +77,10 @@ export default function CrearEditarCancha() {
                 throw new Error('El precio debe ser mayor a 0');
             }
 
+            if (!cancha.tipo_cancha) {
+                throw new Error('Debe seleccionar el tipo de cancha');
+            }
+
             if (!cancha.horarios_disponibles || cancha.horarios_disponibles.length === 0) {
                 throw new Error('Debe especificar al menos un horario disponible');
             }
@@ -89,6 +94,7 @@ export default function CrearEditarCancha() {
             const datosCancha = {
                 precio: parseFloat(cancha.precio),
                 en_mantenimiento: Boolean(cancha.en_mantenimiento), // Asegurar que sea boolean
+                tipo_cancha: cancha.tipo_cancha,
                 horarios_disponibles: horariosLimpios
             };
 
@@ -110,7 +116,16 @@ export default function CrearEditarCancha() {
                     return; // No continuar con la navegación inmediata
                 }
             } else {
-                await crearCancha(datosCancha);
+                const resultado = await crearCancha(datosCancha);
+                if (resultado.success) {
+                    // Mostrar mensaje de éxito específico
+                    setSuccess(resultado.message || 'Cancha creada correctamente');
+                    // Redirigir después de 2 segundos para que el usuario vea el mensaje
+                    setTimeout(() => {
+                        navigate('/canchas');
+                    }, 2000);
+                    return; // No continuar con la navegación inmediata
+                }
             }
 
             navigate('/canchas');
@@ -256,6 +271,32 @@ export default function CrearEditarCancha() {
                                 />
                             </div>
                             <p className="mt-1 text-xs text-gray-500">Precio en pesos argentinos</p>
+                        </div>
+
+                        {/* Tipo de Cancha */}
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                <span className="flex items-center gap-2">
+                                    <svg className="w-5 h-5 text-[#588157]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                                    </svg>
+                                    Tipo de Cancha
+                                    <span className="text-red-500">*</span>
+                                </span>
+                            </label>
+                            <select
+                                name="tipo_cancha"
+                                value={cancha.tipo_cancha}
+                                onChange={handleChange}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#588157] focus:border-transparent transition duration-200 bg-white"
+                                required
+                            >
+                                <option value="Padel">Padel</option>
+                                <option value="Futbol">Fútbol</option>
+                                <option value="Tenis">Tenis</option>
+                                <option value="Otra">Otra</option>
+                            </select>
+                            <p className="mt-1 text-xs text-gray-500">Selecciona el tipo de deporte de la cancha</p>
                         </div>
 
                         {/* Estado de Mantenimiento */}

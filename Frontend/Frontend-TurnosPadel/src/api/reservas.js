@@ -296,7 +296,6 @@ export const actualizarReservaParcial = async (id, camposActualizar) => {
 };
 
 // Las funciones de validación están disponibles en ../utils
-// Importar validarDatosReserva si necesitas validar datos antes de enviarlos
 
 export const obtenerReservaUsuario = async (userId) => {
     try {

@@ -157,7 +157,10 @@ export const validacionesCrearTurno = [
                 throw new Error('El nombre no puede estar vacío');
             }
             return true;
-        })
+        }),
+    body('tipo_cancha')
+        .isIn(['Futbol', 'Padel', 'Tenis', 'Otra'])
+        .withMessage('El tipo de cancha debe ser: Futbol, Padel, Tenis u Otra')
 ];
 
 /**
@@ -190,7 +193,11 @@ export const validacionesActualizarTurno = [
     body('estado')
         .optional()
         .isIn(['pendiente de pago', 'reservado', 'cancelado', 'completado'])
-        .withMessage('Estado inválido')
+        .withMessage('Estado inválido'),
+    body('tipo_cancha')
+        .optional()
+        .isIn(['Futbol', 'Padel', 'Tenis', 'Otra'])
+        .withMessage('El tipo de cancha debe ser: Futbol, Padel, Tenis u Otra')
 ];
 
 /**

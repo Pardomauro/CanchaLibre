@@ -19,8 +19,10 @@ export const AuthProvider = ({ children }) => {
         const token = localStorage.getItem('token');
         const userId = localStorage.getItem('userId');
         const userRole = localStorage.getItem('userRole');
+        const userName = localStorage.getItem('userName');
+        const userEmail = localStorage.getItem('userEmail');
 
-        console.log('AuthContext - Datos encontrados en localStorage:', { token, userId, userRole });
+        console.log('AuthContext - Datos encontrados en localStorage:', { token, userId, userRole, userName, userEmail });
 
         if (token && userId && userRole) {
             // Verificar si el token es válido (no es un token temporal de prueba)
@@ -29,13 +31,17 @@ export const AuthProvider = ({ children }) => {
                 localStorage.removeItem('token');
                 localStorage.removeItem('userId');
                 localStorage.removeItem('userRole');
+                localStorage.removeItem('userName');
+                localStorage.removeItem('userEmail');
             } else {
                 // TODO: En el futuro, validar token con el backend
                 console.log('AuthContext - Estableciendo usuario como autenticado');
                 setUser({
                     userId: userId,
                     role: userRole,
-                    token: token
+                    token: token,
+                    nombre: userName,
+                    email: userEmail
                 });
             }
         } else {
@@ -45,10 +51,21 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const login = (userData) => {
-        setUser(userData);
+        // Normalizar los datos del usuario para el estado local
+        const nombre = userData.user?.nombre || userData.nombre || '';
+        const email = userData.user?.email || userData.email || '';
+
+        setUser({
+            ...userData,
+            nombre,
+            email
+        });
+
         localStorage.setItem('token', userData.token);
         localStorage.setItem('userId', userData.userId);
         localStorage.setItem('userRole', userData.role);
+        localStorage.setItem('userName', nombre);
+        localStorage.setItem('userEmail', email);
     };
 
     const logout = () => {
@@ -57,6 +74,8 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('token');
         localStorage.removeItem('userId');
         localStorage.removeItem('userRole');
+        localStorage.removeItem('userName');
+        localStorage.removeItem('userEmail');
     };
 
     const isAuthenticated = () => {

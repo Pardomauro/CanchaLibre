@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { obtenerCanchas, obtenerCanchaPorId } from '../../api/canchas';
 import { crearReserva, obtenerHorariosDisponibles } from '../../api/reservas';
+import { obtenerPerfilUsuario } from '../../api/usuarios';
 import { useAuth } from '../../context/AuthContext';
 import ConfirmDialog from '../../components/accionesCriticas/ConfirmDialog';
 
@@ -36,6 +37,7 @@ const NuevaReserva = ({
         id_cancha: canchaId || '',
         email_usuario: isAdmin ? '' : (user?.email || ''),
         nombre_usuario: isAdmin ? '' : (user?.nombre || ''),
+        tipo_cancha: '',
         fecha: '',
         hora: '',
         duracion: 60,
@@ -61,9 +63,24 @@ const NuevaReserva = ({
         if (!isAdmin) {
             setFormData(prev => ({
                 ...prev,
-                email_usuario: user?.email || prev.email_usuario,
-                nombre_usuario: user?.nombre || prev.nombre_usuario,
+                email_usuario: user?.email || user?.user?.email || prev.email_usuario,
+                nombre_usuario: user?.nombre || user?.user?.nombre || prev.nombre_usuario,
             }));
+
+            // Si no tenemos el nombre o email en el contexto, lo buscamos en el backend
+            if (user?.userId && (!user.nombre || !user.email) && !user?.user) {
+                obtenerPerfilUsuario(user.userId)
+                    .then(perfil => {
+                        if (perfil) {
+                            setFormData(prev => ({
+                                ...prev,
+                                email_usuario: perfil.email || prev.email_usuario,
+                                nombre_usuario: perfil.nombre || prev.nombre_usuario,
+                            }));
+                        }
+                    })
+                    .catch(err => console.error('Error al obtener perfil del usuario:', err));
+            }
         }
     }, [isAdmin, user]);
 
@@ -82,7 +99,8 @@ const NuevaReserva = ({
             setFormData(prev => ({
                 ...prev,
                 id_cancha: canchaId,
-                precio: data.precio || ''
+                precio: data.precio || '',
+                tipo_cancha: data.tipo_cancha || 'Padel'
             }));
         } catch (err) {
             console.error('Error cargando cancha:', err);
@@ -194,13 +212,14 @@ const NuevaReserva = ({
     const handleChange = (e) => {
         const { name, value } = e.target;
 
-        // Si se cambia la cancha, actualizar también el precio
+        // Si se cambia la cancha, actualizar también el precio y tipo_cancha
         if (name === 'id_cancha' && !canchaId) {
             const canchaSelecionada = canchas.find(c => c.id_cancha === parseInt(value));
             setFormData(prev => ({
                 ...prev,
                 [name]: value,
-                precio: canchaSelecionada?.precio || ''
+                precio: canchaSelecionada?.precio || '',
+                tipo_cancha: canchaSelecionada?.tipo_cancha || ''
             }));
         } else {
             setFormData(prev => ({
@@ -292,6 +311,7 @@ const NuevaReserva = ({
             nombre: formData.nombre_usuario,
             email: formData.email_usuario,
             estado: formData.estado,
+            tipo_cancha: formData.tipo_cancha,
             nombreCancha: `Cancha ${canchaInfo?.id_cancha}`,
             warning: validacion.warning || null
         });
@@ -311,6 +331,7 @@ const NuevaReserva = ({
             const reservaData = {
                 id_usuario: isAdmin ? null : (user?.userId || user?.id || null),
                 id_cancha: parseInt(formData.id_cancha),
+                tipo_cancha: formData.tipo_cancha || canchaSeleccionada?.tipo_cancha || 'Padel',
                 fecha_turno: fechaHora,
                 duracion: parseInt(formData.duracion),
                 precio: parseFloat(formData.precio),
@@ -419,7 +440,8 @@ const NuevaReserva = ({
                     {canchaId && canchaSeleccionada && (
                         <div className="bg-gradient-to-r from-[#DAD7CD]/30 to-[#A3B18A]/30 p-4 rounded-lg mb-6 border border-[#A3B18A]/30">
                             <h3 className="font-semibold mb-2 text-[#3A5A40]">Información de la Cancha</h3>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
+                                <p><span className="font-medium">Tipo:</span> <span className="capitalize">{canchaSeleccionada.tipo_cancha || 'No especificado'}</span></p>
                                 <p><span className="font-medium">Precio:</span> ${canchaSeleccionada.precio?.toLocaleString()}</p>
                                 <p><span className="font-medium">Estado:</span> <span className="text-[#588157] font-semibold">Disponible</span></p>
                             </div>
@@ -474,11 +496,19 @@ const NuevaReserva = ({
                                 type="text"
                                 name="nombre_usuario"
                                 value={formData.nombre_usuario}
+                                readOnly={!isAdmin}
                                 onChange={handleChange}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#588157] focus:border-transparent transition duration-200"
-                                placeholder="Ej: Juan Pérez"
+                                className={`w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#588157] focus:border-transparent transition duration-200 ${
+                                    !isAdmin ? 'bg-gray-50 cursor-not-allowed' : ''
+                                }`}
+                                placeholder={isAdmin ? "Ej: Juan Pérez" : (user?.nombre || user?.user?.nombre || "Cargando...")}
                                 required
                             />
+                            {!isAdmin && formData.nombre_usuario && (
+                                <p className="mt-1 text-xs text-[#588157] font-medium">
+                                    ✓ {formData.nombre_usuario}
+                                </p>
+                            )}
                         </div>
 
                         {/* Campo Email */}
@@ -493,11 +523,19 @@ const NuevaReserva = ({
                                 type="email"
                                 name="email_usuario"
                                 value={formData.email_usuario}
+                                readOnly={!isAdmin}
                                 onChange={handleChange}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#588157] focus:border-transparent transition duration-200"
-                                placeholder="ejemplo@correo.com"
+                                className={`w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#588157] focus:border-transparent transition duration-200 ${
+                                    !isAdmin ? 'bg-gray-50 cursor-not-allowed' : ''
+                                }`}
+                                placeholder={isAdmin ? "ejemplo@correo.com" : (user?.email || user?.user?.email || "Cargando...")}
                                 required
                             />
+                            {!isAdmin && formData.email_usuario && (
+                                <p className="mt-1 text-xs text-[#588157] font-medium">
+                                    ✓ {formData.email_usuario}
+                                </p>
+                            )}
                         </div>
 
                         {/* Título de sección - Detalles de Reserva */}
@@ -529,7 +567,7 @@ const NuevaReserva = ({
                                     <option value="">Seleccionar cancha</option>
                                     {canchas.filter(cancha => !cancha.en_mantenimiento).map(cancha => (
                                         <option key={cancha.id_cancha} value={cancha.id_cancha}>
-                                            Cancha {cancha.id_cancha} - ${cancha.precio?.toLocaleString()}
+                                            Cancha {cancha.id_cancha} - {cancha.tipo_cancha || 'Sin tipo'} - ${cancha.precio?.toLocaleString()}
                                         </option>
                                     ))}
                                 </select>
@@ -846,6 +884,10 @@ const NuevaReserva = ({
                                                     <p className="font-semibold text-gray-800">{confirmData.nombreCancha}</p>
                                                 </div>
                                                 <div>
+                                                    <span className="text-xs text-gray-500 uppercase tracking-wide">Tipo</span>
+                                                    <p className="font-semibold text-gray-800 capitalize">{confirmData.tipo_cancha || 'No especificado'}</p>
+                                                </div>
+                                                <div>
                                                     <span className="text-xs text-gray-500 uppercase tracking-wide">Fecha</span>
                                                     <p className="font-semibold text-gray-800">{confirmData.fecha}</p>
                                                 </div>
@@ -857,9 +899,9 @@ const NuevaReserva = ({
                                                     <span className="text-xs text-gray-500 uppercase tracking-wide">Duración</span>
                                                     <p className="font-semibold text-gray-800">{confirmData.duracion} min</p>
                                                 </div>
-                                                <div>
+                                                <div className="col-span-2">
                                                     <span className="text-xs text-gray-500 uppercase tracking-wide">Precio Total</span>
-                                                    <p className="font-semibold text-green-700">${confirmData.precio?.toLocaleString()}</p>
+                                                    <p className="font-semibold text-green-700 text-lg">${confirmData.precio?.toLocaleString()}</p>
                                                 </div>
                                             </div>
                                             <div className="mt-3 pt-3 border-t border-blue-200">

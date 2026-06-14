@@ -109,6 +109,34 @@ router.get('/canchas', [protegerRuta, verificarAdmin], async (req, res) => {
     }
 });
 
+{/*NUEVO*/}
+// GET /api/estadisticas/tipo-canchas - Estadísticas de tipo de canchas con más reservas
+router.get('/tipo-canchas', [protegerRuta, verificarAdmin], async (req, res) => {
+    try {
+        const [estadisticas] = await pool.query(`
+            SELECT 
+                c.tipo,
+                COUNT(t.id) as reservas
+            FROM canchas c
+            LEFT JOIN turnos t ON c.id = t.id_cancha AND t.estado IN ('completado')
+            GROUP BY c.tipo
+        `);
+        res.status(200).json({
+            success: true,
+            message: 'Estadísticas de tipo de canchas obtenidas correctamente',
+            data: estadisticas
+        });
+    } catch (error) {
+        console.error('Error al obtener estadísticas de tipo de canchas:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno al obtener estadísticas de tipo de canchas',
+            error: error.message
+        });
+    }
+});
+
+
 // GET /api/estadisticas/reservas - Estadísticas específicas de reservas
 router.get('/reservas', [protegerRuta, verificarAdmin], async (req, res) => {
     try {

@@ -25,7 +25,8 @@ router.get('/', async (req, res) => {
                 en_mantenimiento,
                 horarios_disponibles,
                 fecha_creacion,
-                fecha_actualizacion
+                fecha_actualizacion,
+                tipo_cancha
             FROM canchas 
             ORDER BY id ASC
         `);
@@ -62,7 +63,8 @@ router.get('/:id', [
                 en_mantenimiento,
                 horarios_disponibles,
                 fecha_creacion,
-                fecha_actualizacion
+                fecha_actualizacion,
+                tipo_cancha
             FROM canchas 
             WHERE id = ?
         `, [id]);
@@ -90,6 +92,28 @@ router.get('/:id', [
     }
 });
 
+// GET /api/canchas/tipo-cancha - Obtener las canchas agrupadas por tipo
+router.get('/tipo-cancha', async (req, res) => {
+    try {
+        const [rows] = await pool.query(`
+            SELECT
+                tipo_cancha,
+                COUNT(*) AS cantidad
+            FROM canchas
+            GROUP BY tipo_cancha
+            ORDER BY tipo_cancha
+        `);
+
+        res.status(200).json({
+            success: true,
+            message: 'Canchas agrupadas por tipo obtenidas correctamente',
+            data: rows
+        });
+    } catch (error) {
+        return manejarErrorServidor(error, 'obtener canchas agrupadas por tipo', res);
+    }
+});
+
 // GET /api/canchas/disponibles - Obtener solo canchas disponibles (no en mantenimiento)
 router.get('/disponibles', async (req, res) => {
     try {
@@ -100,7 +124,8 @@ router.get('/disponibles', async (req, res) => {
                 en_mantenimiento,
                 horarios_disponibles,
                 fecha_creacion,
-                fecha_actualizacion
+                fecha_actualizacion,
+                tipo_cancha
             FROM canchas 
             WHERE en_mantenimiento = false
             ORDER BY id ASC
@@ -190,9 +215,9 @@ router.post('/', [
 
         // Crear la nueva cancha en la base de datos
         const [result] = await pool.query(`
-            INSERT INTO canchas (precio, en_mantenimiento, horarios_disponibles, fecha_creacion, fecha_actualizacion)
-            VALUES (?, ?, ?, NOW(), NOW())
-        `, [precio, en_mantenimiento, JSON.stringify(horarios_disponibles)]);
+            INSERT INTO canchas (precio, en_mantenimiento, horarios_disponibles, tipo_cancha, fecha_creacion, fecha_actualizacion)
+            VALUES (?, ?, ?, ?, NOW(), NOW())
+        `, [precio, en_mantenimiento, JSON.stringify(horarios_disponibles), req.body.tipo_cancha]);
 
         // Obtener la cancha recién creada con todos sus campos
         const [newCancha] = await pool.query(`
@@ -201,6 +226,7 @@ router.post('/', [
                 precio,
                 en_mantenimiento,
                 horarios_disponibles,
+                tipo_cancha,
                 fecha_creacion,
                 fecha_actualizacion
             FROM canchas 
@@ -244,7 +270,7 @@ router.put('/:id', [
             });
         }
 
-        const { precio, en_mantenimiento, horarios_disponibles } = req.body;
+        const { precio, en_mantenimiento, horarios_disponibles, tipo_cancha } = req.body;
         const canchaActual = canchas[0];
 
         console.log('📋 Datos recibidos:', {
@@ -254,7 +280,7 @@ router.put('/:id', [
         });
 
         // Validar que al menos un campo sea enviado para actualizar
-        const camposPermitidos = ['precio', 'en_mantenimiento', 'horarios_disponibles'];
+        const camposPermitidos = ['precio', 'en_mantenimiento', 'horarios_disponibles', 'tipo_cancha'];
         if (!validarCamposActualizacion(req.body, camposPermitidos)) {
             return res.status(400).json({
                 success: false,
@@ -340,17 +366,18 @@ router.put('/:id', [
                     typeof en_mantenimiento === 'number' ? en_mantenimiento === 1 : false)
             : canchaActual.en_mantenimiento;
         const horariosFinal = horarios_disponibles !== undefined ? JSON.stringify(horarios_disponibles) : canchaActual.horarios_disponibles;
-
+        const tipoCanchaFinal = tipo_cancha !== undefined ? tipo_cancha : canchaActual.tipo_cancha;
         console.log('💾 Guardando valores finales:', {
             precioFinal,
             mantenimientoFinal,
-            horariosFinal: typeof horariosFinal === 'string' ? JSON.parse(horariosFinal) : horariosFinal
+            horariosFinal: typeof horariosFinal === 'string' ? JSON.parse(horariosFinal) : horariosFinal,
+            tipoCanchaFinal
         });
 
         // Actualizar cancha en la base de datos
         await pool.query(
-            'UPDATE canchas SET precio = ?, en_mantenimiento = ?, horarios_disponibles = ?, fecha_actualizacion = NOW() WHERE id = ?',
-            [precioFinal, mantenimientoFinal, horariosFinal, id]
+            'UPDATE canchas SET precio = ?, en_mantenimiento = ?, horarios_disponibles = ?, tipo_cancha = ?, fecha_actualizacion = NOW() WHERE id = ?',
+            [precioFinal, mantenimientoFinal, horariosFinal, tipoCanchaFinal, id]
         );
 
         // Obtener cancha actualizada con formato consistente
@@ -360,6 +387,7 @@ router.put('/:id', [
                 precio,
                 en_mantenimiento,
                 horarios_disponibles,
+                tipo_cancha,
                 fecha_creacion,
                 fecha_actualizacion
             FROM canchas 
@@ -420,6 +448,7 @@ router.delete('/:id', [
             message: 'Cancha eliminada correctamente',
             data: {
                 id_cancha: canchaEliminada.id,
+                tipo_cancha: canchaEliminada.tipo_cancha,
                 eliminada_en: new Date().toISOString()
             }
         });

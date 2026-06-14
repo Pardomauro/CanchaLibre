@@ -15,7 +15,11 @@ export const validacionesCrearCancha = [
         .isArray()
         .withMessage('Los horarios disponibles deben ser un array')
         .notEmpty()
-        .withMessage('Debe proporcionar al menos un horario disponible')
+        .withMessage('Debe proporcionar al menos un horario disponible'),
+    body('tipo_cancha')
+        .isString()
+        .notEmpty()
+        .withMessage('El tipo de cancha es obligatorio')
 ];
 
 /**
@@ -49,7 +53,12 @@ export const validacionesActualizarCancha = [
                 throw new Error('Debe proporcionar al menos un horario disponible');
             }
             return true;
-        })
+        }),
+    body('tipo_cancha')
+        .optional()
+        .isString()
+        .notEmpty()
+        .withMessage('El tipo de cancha no puede estar vacío si se proporciona')
 ];
 
 /**

@@ -189,5 +189,4 @@ export const obtenerPerfilUsuario = async (id) => {
 };
 
 // Las funciones de validación están disponibles en ../utils
-// Importar validarDatosUsuario si se necesita validar datos antes de enviarlos
 
