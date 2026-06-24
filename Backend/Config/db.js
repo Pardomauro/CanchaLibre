@@ -66,6 +66,18 @@ const inicializarDataBase = async () => {
             )
         `);
 
+        // Asegurar que la columna tipo_cancha exista en canchas ya creadas
+        try {
+            await connection.execute(`
+                ALTER TABLE canchas 
+                ADD COLUMN tipo_cancha ENUM('Futbol', 'Padel', 'Tenis', 'Otra') NOT NULL DEFAULT 'Padel';
+            `);
+        } catch (error) {
+            if (error.code !== 'ER_DUP_FIELDNAME') {
+                throw error;
+            }
+        }
+
 
         // Crear tabla usuarios con columna rol
         await connection.execute(`

@@ -6,6 +6,29 @@ import { obtenerPerfilUsuario } from '../../api/usuarios';
 import { useAuth } from '../../context/AuthContext';
 import ConfirmDialog from '../../components/accionesCriticas/ConfirmDialog';
 
+const convertirHoraAMinutos = (hora) => {
+    const [horas, minutos] = String(hora || '').split(':').map(Number);
+    if (Number.isNaN(horas) || Number.isNaN(minutos)) return null;
+    return horas * 60 + minutos;
+};
+
+const obtenerDuracionDesdeHorario = (horario) => {
+    const [inicio, fin] = String(horario || '').split('-').map(parte => parte.trim());
+    const inicioMinutos = convertirHoraAMinutos(inicio);
+    const finMinutos = convertirHoraAMinutos(fin);
+
+    if (inicioMinutos === null || finMinutos === null) return null;
+
+    const finAjustado = finMinutos <= inicioMinutos ? finMinutos + (24 * 60) : finMinutos;
+    const duracion = finAjustado - inicioMinutos;
+    return [60, 90, 120].includes(duracion) ? duracion : null;
+};
+
+const obtenerDuracionPorDefectoCancha = (cancha) => {
+    const horarios = Array.isArray(cancha?.horarios_disponibles) ? cancha.horarios_disponibles : [];
+    return horarios.map(obtenerDuracionDesdeHorario).find(Boolean) || 60;
+};
+
 /**
  * Componente reutilizable para crear reservas
  * @param {Object} props

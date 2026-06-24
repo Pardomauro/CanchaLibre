@@ -87,7 +87,7 @@ export const validacionesActualizarUsuario = [
         .withMessage('Email inválido')
         .normalizeEmail(),
     body('celular')
-        .optional()
+        .optional({ values: 'falsy' })
         .trim()
         .matches(/^\+?\d{7,15}$/)
         .withMessage('Número de celular inválido. Debe contener entre 7 y 15 dígitos, opcionalmente comenzando con +'),   

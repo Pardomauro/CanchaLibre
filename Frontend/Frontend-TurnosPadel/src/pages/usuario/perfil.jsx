@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { obtenerPerfilUsuario, actualizarUsuario } from '../../api/usuarios';
+import { useAuth } from '../../context/AuthContext';
 
 const Perfil = () => {
+  const { updateUser } = useAuth();
   const [profile, setProfile] = useState({
     nombre: '',
     email: '',
-    telefono: ''
+    celular: ''
   });
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState('');
@@ -19,7 +21,11 @@ const Perfil = () => {
     try {
       const userId = localStorage.getItem('userId');
       const userData = await obtenerPerfilUsuario(userId);
-      setProfile(userData);
+      setProfile({
+        nombre: userData?.nombre || '',
+        email: userData?.email || '',
+        celular: userData?.celular || ''
+      });
     } catch (err) {
       setError('Error al cargar el perfil');
     }
@@ -40,11 +46,25 @@ const Perfil = () => {
 
     try {
       const userId = localStorage.getItem('userId');
-      await actualizarUsuario(userId, profile);
+      const usuarioActualizado = await actualizarUsuario(userId, {
+        nombre: profile.nombre,
+        email: profile.email,
+        celular: profile.celular
+      });
+
+      setProfile({
+        nombre: usuarioActualizado?.nombre || profile.nombre,
+        email: usuarioActualizado?.email || profile.email,
+        celular: usuarioActualizado?.celular || profile.celular
+      });
+      updateUser({
+        nombre: usuarioActualizado?.nombre || profile.nombre,
+        email: usuarioActualizado?.email || profile.email
+      });
       setSuccess('Perfil actualizado correctamente');
       setIsEditing(false);
     } catch (err) {
-      setError(err.response?.data?.message || 'Error al actualizar el perfil');
+      setError(err.message || 'Error al actualizar el perfil');
     }
   };
 
@@ -132,13 +152,43 @@ const Perfil = () => {
                 type="email"
                 name="email"
                 value={profile.email}
-                disabled
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-gray-50 text-gray-500 cursor-not-allowed text-sm sm:text-base"
+                onChange={handleChange}
+                disabled={!isEditing}
+                className={`w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm text-sm sm:text-base transition duration-200 ${
+                  !isEditing
+                    ? 'bg-gray-50 text-gray-500 cursor-not-allowed'
+                    : 'bg-white focus:outline-none focus:ring-2 focus:ring-[#588157] focus:border-transparent'
+                }`}
                 placeholder="ejemplo@correo.com"
               />
-              <p className="mt-2 text-xs text-gray-500">
+              <p className="hidden">
                 El correo electrónico no puede ser modificado
               </p>
+            </div>
+
+            {/* Celular Field */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5 text-[#588157]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.95.68l1.5 4.49a1 1 0 01-.5 1.21l-2.26 1.13a11.04 11.04 0 005.52 5.52l1.13-2.26a1 1 0 011.21-.5l4.49 1.5a1 1 0 01.68.95V19a2 2 0 01-2 2h-1C9.72 21 3 14.28 3 6V5z" />
+                  </svg>
+                  Celular
+                </div>
+              </label>
+              <input
+                type="tel"
+                name="celular"
+                value={profile.celular}
+                onChange={handleChange}
+                disabled={!isEditing}
+                className={`w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm text-sm sm:text-base transition duration-200 ${
+                  !isEditing
+                    ? 'bg-gray-50 text-gray-500 cursor-not-allowed'
+                    : 'bg-white focus:outline-none focus:ring-2 focus:ring-[#588157] focus:border-transparent'
+                }`}
+                placeholder="Tu numero de celular"
+              />
             </div>
 
             {/* Action Buttons */}

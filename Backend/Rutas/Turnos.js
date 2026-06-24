@@ -15,9 +15,48 @@ import {
     validacionesActualizarTurno,
     validacionesEliminarTurno
 } from '../middlewares/index.js';
-import { convertirFechaMySQL, validarDisponibilidadHorario, validarCamposActualizacion } from '../middlewares/helpers.js';
+import { convertirFechaMySQL, validarDisponibilidadHorario, validarCamposActualizacion, parsearHorarios } from '../middlewares/helpers.js';
 
 const router = express.Router();
+
+const convertirHoraAMinutos = (hora) => {
+    const [horas, minutos] = String(hora || '').split(':').map(Number);
+    if (Number.isNaN(horas) || Number.isNaN(minutos)) return null;
+    return horas * 60 + minutos;
+};
+
+const convertirMinutosAHora = (totalMinutos) => {
+    const minutosNormalizados = totalMinutos % (24 * 60);
+    const horas = Math.floor(minutosNormalizados / 60);
+    const minutos = minutosNormalizados % 60;
+    return `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}`;
+};
+
+const normalizarHorarioCancha = (horario, duracionMinutos) => {
+    const [inicio, finConfigurado] = String(horario || '').split('-').map(parte => parte.trim());
+    const inicioMinutos = convertirHoraAMinutos(inicio);
+
+    if (inicioMinutos === null) return null;
+
+    const finMinutosConfigurado = finConfigurado ? convertirHoraAMinutos(finConfigurado) : null;
+    let duracionConfigurada = duracionMinutos;
+
+    if (finMinutosConfigurado !== null) {
+        const finAjustado = finMinutosConfigurado <= inicioMinutos
+            ? finMinutosConfigurado + (24 * 60)
+            : finMinutosConfigurado;
+        duracionConfigurada = finAjustado - inicioMinutos;
+    }
+
+    if (duracionConfigurada !== duracionMinutos) return null;
+
+    const fin = finConfigurado || convertirMinutosAHora(inicioMinutos + duracionMinutos);
+
+    return {
+        horario: `${inicio}-${fin}`,
+        hora: inicio
+    };
+};
 
 const formatearFechaReserva = (fechaEntrada) => {
     if (!fechaEntrada) {
@@ -314,7 +353,7 @@ const obtenerHorariosDisponiblesHandler = async (req, res) => {
 
         // Verificar que la cancha existe y no está en mantenimiento
         const [canchaData] = await pool.query(
-            'SELECT id FROM canchas WHERE id = ? AND en_mantenimiento = false',
+            'SELECT id, horarios_disponibles FROM canchas WHERE id = ? AND en_mantenimiento = false',
             [id_cancha]
         );
 
@@ -326,7 +365,10 @@ const obtenerHorariosDisponiblesHandler = async (req, res) => {
         }
 
         // Generar horarios dinámicos según la duración
-        let horariosCancha = [];
+        const horariosCancha = parsearHorarios(canchaData[0].horarios_disponibles)
+            .map(horario => normalizarHorarioCancha(horario, duracionMinutos))
+            .filter(Boolean);
+        /*
         const generarHorariosDinamicos = (duracionMinutos) => {
             const horarios = [];
             const horaInicio = 8; // 8:00 AM
@@ -355,6 +397,22 @@ const obtenerHorariosDisponiblesHandler = async (req, res) => {
         };
 
         horariosCancha = generarHorariosDinamicos(duracionMinutos);
+        */
+
+        if (horariosCancha.length === 0) {
+            return res.status(200).json({
+                success: true,
+                message: 'No hay horarios configurados para la duracion seleccionada',
+                data: {
+                    fecha: fecha,
+                    id_cancha: id_cancha,
+                    horarios_disponibles: [],
+                    horarios_ocupados: [],
+                    total_disponibles: 0,
+                    total_ocupados: 0
+                }
+            });
+        }
 
         // Obtener turnos reservados para esa fecha
         const [turnosReservados] = await pool.query(
@@ -371,12 +429,12 @@ const obtenerHorariosDisponiblesHandler = async (req, res) => {
         const horariosOcupados = [];
 
         for (let horario of horariosCancha) {
-            // Extraer hora de inicio del horario (formato: "08:00-09:30" o "08:00")
-            let horaInicio = horario.split('-')[0];
+            let horaInicio = horario.hora;
             if (!horaInicio) continue;
 
             const fechaHoraCompleta = `${fecha} ${horaInicio}:00`;
             const horaInicioDate = new Date(fechaHoraCompleta);
+            const horaFinDate = new Date(horaInicioDate.getTime() + (duracionMinutos * 60000));
 
             let disponible = true;
 
@@ -386,7 +444,7 @@ const obtenerHorariosDisponiblesHandler = async (req, res) => {
                 const turnoFin = new Date(turnoInicio.getTime() + (turno.duracion * 60000));
 
                 // Si hay solapamiento, el horario no está disponible
-                if (horaInicioDate >= turnoInicio && horaInicioDate < turnoFin) {
+                if (horaInicioDate < turnoFin && horaFinDate > turnoInicio) {
                     disponible = false;
                     break;
                 }
@@ -394,13 +452,13 @@ const obtenerHorariosDisponiblesHandler = async (req, res) => {
 
             if (disponible) {
                 horariosDisponibles.push({
-                    horario: horario,
+                    horario: horario.horario,
                     hora: horaInicio,
                     disponible: true
                 });
             } else {
                 horariosOcupados.push({
-                    horario: horario,
+                    horario: horario.horario,
                     hora: horaInicio,
                     disponible: false
                 });

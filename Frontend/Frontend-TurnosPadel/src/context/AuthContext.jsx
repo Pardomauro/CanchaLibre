@@ -78,6 +78,21 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('userEmail');
     };
 
+    const updateUser = (userData) => {
+        setUser(prevUser => ({
+            ...prevUser,
+            ...userData
+        }));
+
+        if (userData.nombre !== undefined) {
+            localStorage.setItem('userName', userData.nombre);
+        }
+
+        if (userData.email !== undefined) {
+            localStorage.setItem('userEmail', userData.email);
+        }
+    };
+
     const isAuthenticated = () => {
         return !!user;
     };
@@ -90,6 +105,7 @@ export const AuthProvider = ({ children }) => {
         user,
         login,
         logout,
+        updateUser,
         isAuthenticated,
         isAdmin,
         loading
