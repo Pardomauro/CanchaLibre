@@ -1,7 +1,8 @@
 import express from 'express';
 import { pool } from '../Config/db.js';
-import { enviarCorreo } from '../Servicios/EmailServicio.js';
 import { protegerRuta, verificarRol } from '../Servicios/token.js';
+import { enviarCorreoConfirmacionReserva, formatearFechaReserva } from '../utils/reenvio-confirmacion.js';
+import { enviarCorreoCancelacionReserva } from '../utils/envio-cancelacion.js';
 import {
     validarCampos,
     manejarErrorServidor,
@@ -58,57 +59,8 @@ const normalizarHorarioCancha = (horario, duracionMinutos) => {
     };
 };
 
-const formatearFechaReserva = (fechaEntrada) => {
-    if (!fechaEntrada) {
-        return { fechaTexto: 'Sin fecha', horaTexto: '' };
-    }
-
-    const fecha = fechaEntrada instanceof Date ? fechaEntrada : new Date(fechaEntrada);
-
-    if (Number.isNaN(fecha.getTime())) {
-        const fechaTexto = String(fechaEntrada);
-        const [fechaParte = fechaTexto, horaParte = ''] = fechaTexto.split(' ');
-        return { fechaTexto: fechaParte, horaTexto: horaParte };
-    }
-
-    return {
-        fechaTexto: fecha.toLocaleDateString('es-ES', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        }),
-        horaTexto: fecha.toLocaleTimeString('es-ES', {
-            hour: '2-digit',
-            minute: '2-digit'
-        })
-    };
-};
-
-const enviarCorreoConfirmacionReserva = async ({ email, nombre, id_cancha, fechaMysql, precio }) => {
-    if (!email || !email.includes('@')) {
-        return false;
-    }
-
-    const { fechaTexto, horaTexto } = formatearFechaReserva(fechaMysql);
-
-    await enviarCorreo({
-        destinatario: email,
-        asunto: 'Confirmación de Reserva',
-        contenidoHTML: `
-            <h1>Reserva Confirmada</h1>
-            <p>Hola ${nombre || 'Cliente'},</p>
-            <p>Tu reserva para la cancha ${id_cancha} ha sido confirmada.</p>
-            <ul>
-              <li><strong>Fecha:</strong> ${fechaTexto}</li>
-              <li><strong>Horario:</strong> ${horaTexto}</li>
-              <li><strong>Precio:</strong> $${precio}</li>
-            </ul>
-            <p>¡Gracias por elegirnos!</p>
-        `,
-    });
-
-    return true;
-};
+// Las funciones formatearFechaReserva y enviarCorreoConfirmacionReserva
+// ahora se importan desde utils/reenvio-confirmacion.js
 
 const obtenerEmailYNombreUsuario = async (idUsuario) => {
     if (!idUsuario) {
@@ -979,19 +931,49 @@ router.delete('/:id', [
     try {
         const { id } = req.params;
 
-        const [result] = await pool.query(`DELETE FROM turnos WHERE id_turno = ?`, [id]);
+        // Primero obtener los datos del turno antes de eliminarlo
+        const [turnoRows] = await pool.query(
+            `SELECT t.id_turno, t.id_cancha, t.fecha_turno, t.duracion, t.precio, t.estado, 
+                    u.email as email_usuario, u.nombre as nombre_usuario
+             FROM turnos t
+             LEFT JOIN usuarios u ON t.id_usuario = u.id_usuario
+             WHERE t.id_turno = ?`,
+            [id]
+        );
 
-        if (result.affectedRows === 0) {
+        if (!turnoRows || turnoRows.length === 0) {
             return res.status(404).json({
                 success: false,
                 message: 'Turno no encontrado'
-
             });
         }
 
+        const turno = turnoRows[0];
+
+        // Enviar correo de cancelación si existe el email del usuario
+        if (turno.email_usuario) {
+            try {
+                await enviarCorreoCancelacionReserva({
+                    email: turno.email_usuario,
+                    nombre: turno.nombre_usuario,
+                    id_cancha: turno.id_cancha,
+                    fechaMysql: turno.fecha_turno,
+                    precio: turno.precio
+                });
+
+                console.log(`Correo de cancelación enviado a: ${turno.email_usuario}`);
+            } catch (emailError) {
+                console.error('Error al enviar correo de cancelación:', emailError);
+                // Continuar con la eliminación aunque falle el correo
+            }
+        }
+
+        // Eliminar el turno
+        const [result] = await pool.query(`DELETE FROM turnos WHERE id_turno = ?`, [id]);
+
         res.json({
             success: true,
-            message: 'Turno eliminado exitosamente'
+            message: 'Turno eliminado exitosamente y correo de cancelación enviado'
         });
     } catch (error) {
         return manejarErrorServidor(error, 'eliminar turno', res);
