@@ -19,6 +19,7 @@ import {
 import { convertirFechaMySQL, validarDisponibilidadHorario, validarCamposActualizacion, parsearHorarios } from '../middlewares/helpers.js';
 
 const router = express.Router();
+const ESTADOS_QUE_BLOQUEAN_DISPONIBILIDAD = ['pendiente de pago', 'reservado'];
 
 const convertirHoraAMinutos = (hora) => {
     const [horas, minutos] = String(hora || '').split(':').map(Number);
@@ -248,8 +249,8 @@ router.get('/disponibilidad/:id_cancha/:fecha/:hora', [
              FROM turnos 
              WHERE id_cancha = ? 
              AND DATE(fecha_turno) = ? 
-             AND estado = 'reservado'`,
-            [id_cancha, fecha]
+             AND estado IN (?)`,
+            [id_cancha, fecha, ESTADOS_QUE_BLOQUEAN_DISPONIBILIDAD]
         );
 
         // Verificar conflictos de horario
@@ -372,8 +373,8 @@ const obtenerHorariosDisponiblesHandler = async (req, res) => {
              FROM turnos 
              WHERE id_cancha = ? 
              AND DATE(fecha_turno) = ? 
-             AND estado = 'reservado'`,
-            [id_cancha, fecha]
+             AND estado IN (?)`,
+            [id_cancha, fecha, ESTADOS_QUE_BLOQUEAN_DISPONIBILIDAD]
         );
 
         // Filtrar horarios disponibles
@@ -567,7 +568,7 @@ router.post('/', [
         console.log('🔍 Usuario que crea la reserva:', req.usuario);
         console.log('🔍 Es administrador?:', req.usuario?.rol === 'administrador');
 
-        if (estado === 'reservado' && req.usuario?.rol !== 'administrador') {
+        if (ESTADOS_QUE_BLOQUEAN_DISPONIBILIDAD.includes(estado) && req.usuario?.rol !== 'administrador') {
             // Solo validar disponibilidad para usuarios normales
             const fechaSolo = fechaMysql.split(' ')[0]; // Extraer solo la fecha (YYYY-MM-DD)
 
@@ -576,8 +577,8 @@ router.post('/', [
                  FROM turnos 
                  WHERE id_cancha = ? 
                  AND DATE(fecha_turno) = ? 
-                 AND estado = 'reservado'`,
-                [id_cancha, fechaSolo]
+                 AND estado IN (?)`,
+                [id_cancha, fechaSolo, ESTADOS_QUE_BLOQUEAN_DISPONIBILIDAD]
             );
 
             // Verificar conflictos de horario usando función auxiliar
