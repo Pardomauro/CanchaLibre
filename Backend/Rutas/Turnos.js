@@ -544,11 +544,11 @@ router.post('/', [
         }
 
         // Validar que el estado sea uno de los valores permitidos
-        const estadosPermitidos = ['reservado', 'cancelado', 'completado'];
+        const estadosPermitidos = ['pendiente de pago', 'reservado', 'cancelado', 'completado'];
         if (!estadosPermitidos.includes(estado)) {
             return res.status(400).json({
                 success: false,
-                message: 'El estado debe ser uno de los valores permitidos: reservado, cancelado, completado'
+                message: 'El estado debe ser uno de los valores permitidos: pendiente de pago, reservado, cancelado, completado'
             });
         }
 

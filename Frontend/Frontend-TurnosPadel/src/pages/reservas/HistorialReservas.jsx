@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { obtenerReservasPorUsuario, obtenerReservas, eliminarReserva, confirmarReserva } from '../../api/reservas';
+import { obtenerReservasPorUsuario, obtenerReservas, eliminarReserva, confirmarReserva, completarReserva } from '../../api/reservas';
 import { useAuth } from '../../context/AuthContext';
 import ConfirmDialog from '../../components/accionesCriticas/ConfirmDialog';
 
@@ -15,6 +15,7 @@ const HistorialReservas = () => {
     const [reservaAConfirmar, setReservaAConfirmar] = useState(null);
     const [eliminando, setEliminando] = useState(null);
     const [confirmando, setConfirmando] = useState(null);
+    const [reservaCompletada, setReservaCompletada] = useState(null);
 
     useEffect(() => {
         cargarReservas();
@@ -56,6 +57,28 @@ const HistorialReservas = () => {
         setReservaAConfirmar(reserva);
         setShowConfirmApprove(true);
     };
+
+    const handleReservaCompletada = async (reserva) => {
+        try {
+            setReservaCompletada(reserva.id_turno);
+            const respuesta = await completarReserva(reserva.id_turno);
+            console.log('Reserva Completada: ', respuesta);
+            
+            // Actualizar el estado local de la reserva
+            setReservas(prev => prev.map(r => (
+                r.id_turno === reserva.id_turno
+                    ? { ...r, estado: 'completado' }
+                    : r
+            )));
+            
+            alert('✅ Reserva marcada como completada exitosamente.');
+        } catch (err) {
+            console.error('Error al completar reserva:', err);
+            alert('Error al completar la reserva. Por favor, intenta de nuevo.');
+        } finally {
+            setReservaCompletada(null);
+        }
+    }
 
     const confirmarEliminacion = async () => {
         if (!reservaAEliminar) return;
@@ -377,31 +400,45 @@ const HistorialReservas = () => {
                                                 <div className="p-4 sm:p-6">
                                                     {renderDetallesReserva(reserva, fecha, hora)}
 
-                                                    {/* Botón de eliminar (solo admin) */}
+                                                    {/* Botones de acción (solo admin) */}
                                                     {isAdmin() && (
                                                         <div className="mt-4 pt-4 border-t border-[#588157]/10">
-                                                            {reserva.estado === 'pendiente de pago' && (
+                                                            <div className="flex flex-col sm:flex-row gap-2">
+                                                                {reserva.estado === 'pendiente de pago' && (
+                                                                    <button
+                                                                        className={`w-full sm:w-auto px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${confirmando === reserva.id_turno
+                                                                            ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                                                                            : 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-md hover:shadow-lg active:scale-95'
+                                                                            }`}
+                                                                        onClick={() => handleConfirmarReserva(reserva)}
+                                                                        disabled={confirmando === reserva.id_turno}
+                                                                    >
+                                                                        {confirmando === reserva.id_turno ? '⏳ Confirmando...' : '✅ Confirmar Reserva'}
+                                                                    </button>
+                                                                )}
+                                                                {reserva.estado === 'reservado' && new Date(reserva.fecha_turno) <= new Date() && (
+                                                                    <button
+                                                                        className={`w-full sm:w-auto px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${reservaCompletada === reserva.id_turno
+                                                                            ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                                                                            : 'bg-gradient-to-r from-[#588157] to-[#3A5A40] hover:from-[#3A5A40] hover:to-[#344E41] text-white shadow-md hover:shadow-lg active:scale-95'
+                                                                            }`}
+                                                                        onClick={() => handleReservaCompletada(reserva)}
+                                                                        disabled={reservaCompletada === reserva.id_turno}
+                                                                    >
+                                                                        {reservaCompletada === reserva.id_turno ? '⏳ Completando...' : '✓ Marcar como Completada'}
+                                                                    </button>
+                                                                )}
                                                                 <button
-                                                                    className={`w-full sm:w-auto px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 mr-0 sm:mr-3 mb-2 sm:mb-0 ${confirmando === reserva.id_turno
+                                                                    className={`w-full sm:w-auto px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${eliminando === reserva.id_turno
                                                                         ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                                                                        : 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-md hover:shadow-lg active:scale-95'
+                                                                        : 'bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 text-white shadow-md hover:shadow-lg active:scale-95'
                                                                         }`}
-                                                                    onClick={() => handleConfirmarReserva(reserva)}
-                                                                    disabled={confirmando === reserva.id_turno}
+                                                                    onClick={() => handleEliminarReserva(reserva)}
+                                                                    disabled={eliminando === reserva.id_turno}
                                                                 >
-                                                                    {confirmando === reserva.id_turno ? '⏳ Confirmando...' : '✅ Confirmar Reserva'}
+                                                                    {eliminando === reserva.id_turno ? '⏳ Eliminando...' : '🗑️ Eliminar Reserva'}
                                                                 </button>
-                                                            )}
-                                                            <button
-                                                                className={`w-full sm:w-auto px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${eliminando === reserva.id_turno
-                                                                    ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                                                                    : 'bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 text-white shadow-md hover:shadow-lg active:scale-95'
-                                                                    }`}
-                                                                onClick={() => handleEliminarReserva(reserva)}
-                                                                disabled={eliminando === reserva.id_turno}
-                                                            >
-                                                                {eliminando === reserva.id_turno ? '⏳ Eliminando...' : '🗑️ Eliminar Reserva'}
-                                                            </button>
+                                                            </div>
                                                         </div>
                                                     )}
                                                 </div>
@@ -449,31 +486,45 @@ const HistorialReservas = () => {
                                                 <div className="p-4 sm:p-6">
                                                     {renderDetallesReserva(reserva, fecha, hora)}
 
-                                                    {/* Botón de eliminar (solo admin) */}
+                                                    {/* Botones de acción (solo admin) */}
                                                     {isAdmin() && (
                                                         <div className="mt-4 pt-4 border-t border-slate-200">
-                                                            {reserva.estado === 'pendiente de pago' && (
+                                                            <div className="flex flex-col sm:flex-row gap-2">
+                                                                {reserva.estado === 'pendiente de pago' && (
+                                                                    <button
+                                                                        className={`w-full sm:w-auto px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${confirmando === reserva.id_turno
+                                                                            ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                                                                            : 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-md hover:shadow-lg active:scale-95'
+                                                                            }`}
+                                                                        onClick={() => handleConfirmarReserva(reserva)}
+                                                                        disabled={confirmando === reserva.id_turno}
+                                                                    >
+                                                                        {confirmando === reserva.id_turno ? '⏳ Confirmando...' : '✅ Confirmar Reserva'}
+                                                                    </button>
+                                                                )}
+                                                                {reserva.estado === 'reservado' && new Date(reserva.fecha_turno) <= new Date() && (
+                                                                    <button
+                                                                        className={`w-full sm:w-auto px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${reservaCompletada === reserva.id_turno
+                                                                            ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                                                                            : 'bg-gradient-to-r from-[#588157] to-[#3A5A40] hover:from-[#3A5A40] hover:to-[#344E41] text-white shadow-md hover:shadow-lg active:scale-95'
+                                                                            }`}
+                                                                        onClick={() => handleReservaCompletada(reserva)}
+                                                                        disabled={reservaCompletada === reserva.id_turno}
+                                                                    >
+                                                                        {reservaCompletada === reserva.id_turno ? '⏳ Completando...' : '✓ Marcar como Completada'}
+                                                                    </button>
+                                                                )}
                                                                 <button
-                                                                    className={`w-full sm:w-auto px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 mr-0 sm:mr-3 mb-2 sm:mb-0 ${confirmando === reserva.id_turno
+                                                                    className={`w-full sm:w-auto px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${eliminando === reserva.id_turno
                                                                         ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                                                                        : 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-md hover:shadow-lg active:scale-95'
+                                                                        : 'bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 text-white shadow-md hover:shadow-lg active:scale-95'
                                                                         }`}
-                                                                    onClick={() => handleConfirmarReserva(reserva)}
-                                                                    disabled={confirmando === reserva.id_turno}
+                                                                    onClick={() => handleEliminarReserva(reserva)}
+                                                                    disabled={eliminando === reserva.id_turno}
                                                                 >
-                                                                    {confirmando === reserva.id_turno ? '⏳ Confirmando...' : '✅ Confirmar Reserva'}
+                                                                    {eliminando === reserva.id_turno ? '⏳ Eliminando...' : '🗑️ Eliminar Reserva'}
                                                                 </button>
-                                                            )}
-                                                            <button
-                                                                className={`w-full sm:w-auto px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${eliminando === reserva.id_turno
-                                                                    ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                                                                    : 'bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 text-white shadow-md hover:shadow-lg active:scale-95'
-                                                                    }`}
-                                                                onClick={() => handleEliminarReserva(reserva)}
-                                                                disabled={eliminando === reserva.id_turno}
-                                                            >
-                                                                {eliminando === reserva.id_turno ? '⏳ Eliminando...' : '🗑️ Eliminar Reserva'}
-                                                            </button>
+                                                            </div>
                                                         </div>
                                                     )}
                                                 </div>

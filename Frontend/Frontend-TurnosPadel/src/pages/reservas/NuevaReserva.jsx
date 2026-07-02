@@ -21,7 +21,7 @@ const obtenerDuracionDesdeHorario = (horario) => {
 
     const finAjustado = finMinutos <= inicioMinutos ? finMinutos + (24 * 60) : finMinutos;
     const duracion = finAjustado - inicioMinutos;
-    return [60, 90, 120].includes(duracion) ? duracion : null;
+    return [ 60 ].includes(duracion) ? duracion : null;
 };
 
 const obtenerDuracionPorDefectoCancha = (cancha) => {
@@ -65,7 +65,7 @@ const NuevaReserva = ({
         hora: '',
         duracion: 60,
         precio: '',
-        estado: 'reservado'
+        estado: 'pendiente de pago'
     });
 
     useEffect(() => {
@@ -358,7 +358,7 @@ const NuevaReserva = ({
                 fecha_turno: fechaHora,
                 duracion: parseInt(formData.duracion),
                 precio: parseFloat(formData.precio),
-                estado: formData.estado,
+                estado: formData.estado || 'pendiente de pago',
                 email: formData.email_usuario,
                 nombre: formData.nombre_usuario
             };
@@ -628,17 +628,21 @@ const NuevaReserva = ({
                                     <span className="text-red-500">*</span>
                                 </span>
                             </label>
-                            <select
-                                name="duracion"
-                                value={formData.duracion}
-                                onChange={handleChange}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#588157] focus:border-transparent transition duration-200"
-                                required
-                            >
-                                <option value={60}>60 minutos (1 hora)</option>
-                                <option value={90}>90 minutos (1.5 horas)</option>
-                                <option value={120}>120 minutos (2 horas)</option>
-                            </select>
+                            <div className="relative">
+                                <input 
+                                    type="number"
+                                    name="duracion"
+                                    value={formData.duracion}
+                                    onChange={handleChange}
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-gray-50 cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#588157] focus:border-transparent transition duration-200"
+                                    required
+                                    readOnly={true}
+                                />
+                                <span className="absolute right-4 top-3.5 text-gray-500 font-medium">minutos</span>
+                            </div>
+                            <p className="mt-1 text-xs text-gray-500">
+                                Todas las reservas tienen una duración fija de 60 minutos
+                            </p>
                         </div>
 
                         {/* Información adicional para el admin */}
@@ -823,7 +827,9 @@ const NuevaReserva = ({
                                     onChange={handleChange}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#588157] focus:border-transparent transition duration-200"
                                 >
+                                    <option value="pendiente de pago">Pendiente de pago</option>
                                     <option value="reservado">Reservado</option>
+                                    <option value="cancelado">Cancelado</option>
                                     <option value="completado">Completado</option>
                                 </select>
                                 <p className="mt-1 text-xs text-gray-500">

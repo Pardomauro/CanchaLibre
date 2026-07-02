@@ -59,13 +59,28 @@ const GestionUsuarios = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!formData.nombre || !formData.email || !formData.password) {
+        if (!formData.nombre || !formData.email || !formData.celular || !formData.password || !formData.confirmPassword) {
             alert('Por favor completa todos los campos');
             return;
         }
 
         if (formData.password.length < 6) {
             alert('La contraseña debe tener al menos 6 caracteres');
+            return;
+        }
+
+        if (!/\d/.test(formData.password)) {
+            alert('La contraseña debe contener al menos un número');
+            return;
+        }
+
+        if (!/[A-Z]/.test(formData.password)) {
+            alert('La contraseña debe contener al menos una mayúscula');
+            return;
+        }
+
+        if (formData.password !== formData.confirmPassword) {
+            alert('Las contraseñas no coinciden');
             return;
         }
 
@@ -311,48 +326,47 @@ const GestionUsuarios = () => {
                                             Al menos 6 caracteres
                                         </span>
                                     </div>
-                                </div>
-                                <div className="mt-2 text-xs text-gray-500 space-y-1">
                                     <div className="flex items-center space-x-2">
-                                    <div className={`h-1.5 w-1.5 rounded-full ${/\d/.test(formData.password) ? 'bg-[#588157]' : 'bg-gray-300'}`}></div>
-                                    <span className={/\d/.test(formData.password) ? 'text-[#588157]' : 'text-gray-400'}>
-                                        Al menos un número
-                                    </span>
-                                    </div>
-                                </div>
-                                <div className="mt-2 text-xs text-gray-500 space-y-1">
-                                    <div className="flex items-center space-x-2">
-                                    <div className={`h-1.5 w-1.5 rounded-full ${/[A-Z]/.test(formData.password) ? 'bg-[#588157]' : 'bg-gray-300'}`}></div>
-                                    <span className={/[A-Z]/.test(formData.password) ? 'text-[#588157]' : 'text-gray-400'}>
-                                        Al menos una mayúscula
-                                    </span>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-2 mt-4">
-                                        <span className="flex items-center gap-2">
-                                            <svg className="w-4 h-4 text-[#588157]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                            </svg>
-                                            Confirmar Contraseña
-                                            <span className="text-red-500">*</span>
+                                        <div className={`h-1.5 w-1.5 rounded-full ${/\d/.test(formData.password) ? 'bg-[#588157]' : 'bg-gray-300'}`}></div>
+                                        <span className={/\d/.test(formData.password) ? 'text-[#588157]' : 'text-gray-400'}>
+                                            Al menos un número
                                         </span>
-                                    </label>
-                                    <input
-                                        type="password"
-                                        name="confirmPassword"
-                                        value={formData.confirmPassword}
-                                        onChange={handleInputChange}
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#588157] focus:border-transparent transition duration-200"
-                                        placeholder="Reingresa la contraseña"
-                                        minLength="6"
-                                        required
-                                    />
-                                </div> 
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <div className={`h-1.5 w-1.5 rounded-full ${/[A-Z]/.test(formData.password) ? 'bg-[#588157]' : 'bg-gray-300'}`}></div>
+                                        <span className={/[A-Z]/.test(formData.password) ? 'text-[#588157]' : 'text-gray-400'}>
+                                            Al menos una mayúscula
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
 
-                        
-                            
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    <span className="flex items-center gap-2">
+                                        <svg className="w-4 h-4 text-[#588157]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                        </svg>
+                                        Confirmar Contraseña
+                                        <span className="text-red-500">*</span>
+                                    </span>
+                                </label>
+                                <input
+                                    type="password"
+                                    name="confirmPassword"
+                                    value={formData.confirmPassword}
+                                    onChange={handleInputChange}
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#588157] focus:border-transparent transition duration-200"
+                                    placeholder="Reingresa la contraseña"
+                                    minLength="6"
+                                    required
+                                />
+                                {formData.confirmPassword && (
+                                    <p className={`mt-2 text-xs ${formData.password === formData.confirmPassword ? 'text-[#588157]' : 'text-red-600'}`}>
+                                        {formData.password === formData.confirmPassword ? '✓ Las contraseñas coinciden' : '✗ Las contraseñas no coinciden'}
+                                    </p>
+                                )}
+                            </div>
 
                             <div className="flex flex-col sm:flex-row gap-3 pt-4">
                                 <button
@@ -391,13 +405,11 @@ const GestionUsuarios = () => {
                                     Cancelar
                                 </button>
                             </div>
-                    </div>
                         </form>
-        </div>
-    )
-}
+                    </div>
+                )}
 
-{/* Lista de usuarios */ }
+                {/* Lista de usuarios */}
 <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
     <div className="bg-gradient-to-r from-[#DAD7CD] to-[#A3B18A] px-6 py-4">
         <div className="flex items-center gap-2">

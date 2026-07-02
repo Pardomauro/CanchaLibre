@@ -57,6 +57,10 @@ export const validacionesCrearUsuario = [
     body('password')
         .isLength({ min: 6 })
         .withMessage('La contraseña debe tener al menos 6 caracteres')
+        .matches(/\d/)
+        .withMessage('La contraseña debe contener al menos un número')
+        .matches(/[A-Z]/)
+        .withMessage('La contraseña debe contener al menos una mayúscula')
 ];
 
 /**
