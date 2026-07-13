@@ -106,10 +106,10 @@ router.get('/', [
                 t.fecha_actualizacion,
                 u.nombre as nombre_usuario,
                 u.email as email_usuario,
-                t.tipo_cancha
-
+                c.tipo_cancha
              FROM turnos t
              LEFT JOIN usuarios u ON t.id_usuario = u.id_usuario
+             LEFT JOIN canchas c ON t.id_cancha = c.id
              ORDER BY t.fecha_turno DESC
              LIMIT ? OFFSET ?`,
             [parseInt(limite), parseInt(offset)]
@@ -152,9 +152,10 @@ router.get('/usuario/:userId', [
                 t.fecha_actualizacion,
                 u.nombre as nombre_usuario,
                 u.email as email_usuario,
-                t.tipo_cancha
+                c.tipo_cancha
             FROM turnos t
             LEFT JOIN usuarios u ON t.id_usuario = u.id_usuario
+            LEFT JOIN canchas c ON t.id_cancha = c.id
             ORDER BY t.fecha_turno DESC`);
 
             return res.json({
@@ -166,19 +167,20 @@ router.get('/usuario/:userId', [
 
 
         const [rows] = await pool.query(`SELECT
-            id_turno,
-            id_usuario,
-            id_cancha,
-            fecha_turno,
-            duracion,
-            precio,
-            estado,
-            fecha_creacion,
-            fecha_actualizacion,
-            tipo_cancha
-        FROM turnos
-        WHERE id_usuario = ?
-        ORDER BY fecha_turno DESC`, [userId]);
+            t.id_turno,
+            t.id_usuario,
+            t.id_cancha,
+            t.fecha_turno,
+            t.duracion,
+            t.precio,
+            t.estado,
+            t.fecha_creacion,
+            t.fecha_actualizacion,
+            c.tipo_cancha
+        FROM turnos t
+        LEFT JOIN canchas c ON t.id_cancha = c.id
+        WHERE t.id_usuario = ?
+        ORDER BY t.fecha_turno DESC`, [userId]);
 
         res.status(200).json({
             success: true,
@@ -199,18 +201,19 @@ router.get('/:id', [
         const { id } = req.params;
 
         const [rows] = await pool.query(`SELECT
-            id_turno,
-            id_usuario,
-            id_cancha,
-            fecha_turno,
-            duracion,
-            precio,
-            estado,
-            fecha_creacion,
-            fecha_actualizacion,
-            tipo_cancha
-        FROM turnos
-        WHERE id_turno = ?`, [id]);
+            t.id_turno,
+            t.id_usuario,
+            t.id_cancha,
+            t.fecha_turno,
+            t.duracion,
+            t.precio,
+            t.estado,
+            t.fecha_creacion,
+            t.fecha_actualizacion,
+            c.tipo_cancha
+        FROM turnos t
+        LEFT JOIN canchas c ON t.id_cancha = c.id
+        WHERE t.id_turno = ?`, [id]);
 
         if (rows.length === 0) {
             return res.status(404).json({
@@ -496,7 +499,7 @@ router.post('/', [
 ], async (req, res) => {
     try {
         console.log('Datos recibidos para crear turno:', req.body);
-        const { id_usuario, id_cancha, fecha_turno, duracion, precio, estado, email, nombre, tipo_cancha } = req.body;
+        const { id_usuario, id_cancha, fecha_turno, duracion, precio, estado, email, nombre } = req.body;
 
         // Convertir fecha manteniendo la zona horaria local
         const fechaMysql = convertirFechaMySQL(fecha_turno);
@@ -504,7 +507,7 @@ router.post('/', [
         console.log('Fecha convertida para MySQL:', fechaMysql);
 
         // Validar que se proporcionen todos los campos necesarios (id_usuario es opcional)
-        if (!id_cancha || !fecha_turno || !duracion || !precio || !estado || !tipo_cancha) {
+        if (!id_cancha || !fecha_turno || !duracion || !precio || !estado) {
             return res.status(400).json({
                 success: false,
                 message: 'Todos los campos son obligatorios (excepto id_usuario)'
@@ -548,20 +551,10 @@ router.post('/', [
         const estadosPermitidos = ['pendiente de pago', 'reservado', 'cancelado', 'completado'];
         if (!estadosPermitidos.includes(estado)) {
             return res.status(400).json({
-                success: false,
+                success: false, 
                 message: 'El estado debe ser uno de los valores permitidos: pendiente de pago, reservado, cancelado, completado'
             });
         }
-
-        // Validar que el tipo de cancha sea uno de los valores permitidos
-        const tiposCanchaPermitidos = ['Futbol', 'Padel', 'Tenis', 'Otra'];
-        if (!tiposCanchaPermitidos.includes(tipo_cancha)) {
-            return res.status(400).json({
-                success: false,
-                message: 'El tipo de cancha debe ser uno de los valores permitidos: Futbol, Padel, Tenis, Otra'
-            });
-        }
-
 
         // VALIDAR DISPONIBILIDAD DE LA CANCHA (Solo para usuarios normales, no para admins)
         // Los administradores pueden crear reservas sin validar disponibilidad
@@ -674,6 +667,13 @@ router.post('/', [
             try {
                 const emailDestinatario = email || null;
                 if (emailDestinatario) {
+                    // Obtener tipo_cancha desde la tabla canchas
+                    const [canchaRows] = await pool.query(
+                        'SELECT tipo_cancha FROM canchas WHERE id = ?',
+                        [id_cancha]
+                    );
+                    const tipo_cancha = canchaRows[0]?.tipo_cancha || 'No especificado';
+
                     await enviarCorreoConfirmacionReserva({
                         email: emailDestinatario,
                         nombre,
@@ -715,9 +715,10 @@ router.post('/:id/confirmar', [
 
         const [turnoRows] = await pool.query(
             `SELECT t.id_turno, t.id_usuario, t.id_cancha, t.fecha_turno, t.duracion, t.precio, t.estado,
-                    u.email as email_usuario, u.nombre as nombre_usuario
+                    u.email as email_usuario, u.nombre as nombre_usuario, c.tipo_cancha
              FROM turnos t
              LEFT JOIN usuarios u ON t.id_usuario = u.id_usuario
+             LEFT JOIN canchas c ON t.id_cancha = c.id
              WHERE t.id_turno = ?`,
             [id]
         );
@@ -746,9 +747,10 @@ router.post('/:id/confirmar', [
 
         const [turnoActualizadoRows] = await pool.query(
             `SELECT t.id_turno, t.id_usuario, t.id_cancha, t.fecha_turno, t.duracion, t.precio, t.estado,
-                    u.email as email_usuario, u.nombre as nombre_usuario
+                    u.email as email_usuario, u.nombre as nombre_usuario, c.tipo_cancha
              FROM turnos t
              LEFT JOIN usuarios u ON t.id_usuario = u.id_usuario
+             LEFT JOIN canchas c ON t.id_cancha = c.id
              WHERE t.id_turno = ?`,
             [id]
         );
@@ -774,7 +776,8 @@ router.post('/:id/confirmar', [
                     nombre: nombreDestino,
                     id_cancha: turnoActualizado.id_cancha,
                     fechaMysql: turnoActualizado.fecha_turno,
-                    precio: turnoActualizado.precio
+                    precio: turnoActualizado.precio,
+                    tipo_cancha: turnoActualizado.tipo_cancha
                 });
                 correoEnviado = true;
                 console.log('✅ Correo inmediato enviado a:', emailDestino);
@@ -803,13 +806,14 @@ router.put('/:id', [
 ], async (req, res) => {
     try {
         const { id } = req.params;
-        const { id_usuario, id_cancha, fecha_turno, duracion, precio, estado, tipo_cancha } = req.body;
+        const { id_usuario, id_cancha, fecha_turno, duracion, precio, estado } = req.body;
 
         const [turnoAnteriorRows] = await pool.query(
             `SELECT t.id_turno, t.id_usuario, t.id_cancha, t.fecha_turno, t.duracion, t.precio, t.estado,
-                    u.email as email_usuario, u.nombre as nombre_usuario
+                    u.email as email_usuario, u.nombre as nombre_usuario, c.tipo_cancha
              FROM turnos t
              LEFT JOIN usuarios u ON t.id_usuario = u.id_usuario
+             LEFT JOIN canchas c ON t.id_cancha = c.id
              WHERE t.id_turno = ?`,
             [id]
         );
@@ -847,17 +851,13 @@ router.put('/:id', [
             campos.push('precio = ?');
             valores.push(precio);
         }
-        if (tipo_cancha) {
-            campos.push('tipo_cancha = ?');
-            valores.push(tipo_cancha);
-        }
         if (estado) {
             campos.push('estado = ?');
             valores.push(estado);
         }
 
         // Validar que al menos un campo sea enviado para actualizar
-        const camposPermitidos = ['id_usuario', 'id_cancha', 'fecha_turno', 'duracion', 'precio', 'estado', 'tipo_cancha'];
+        const camposPermitidos = ['id_usuario', 'id_cancha', 'fecha_turno', 'duracion', 'precio', 'estado'];
         if (!validarCamposActualizacion(req.body, camposPermitidos)) {
             return res.status(400).json({
                 success: false,
@@ -878,10 +878,11 @@ router.put('/:id', [
         }
 
         const [turnoActualizadoRows] = await pool.query(
-            `SELECT t.id_turno, t.id_usuario, t.id_cancha, t.fecha_turno, t.duracion, t.precio, t.estado, t.tipo_cancha,
-                    u.email as email_usuario, u.nombre as nombre_usuario
+            `SELECT t.id_turno, t.id_usuario, t.id_cancha, t.fecha_turno, t.duracion, t.precio, t.estado,
+                    u.email as email_usuario, u.nombre as nombre_usuario, c.tipo_cancha
              FROM turnos t
              LEFT JOIN usuarios u ON t.id_usuario = u.id_usuario
+             LEFT JOIN canchas c ON t.id_cancha = c.id
              WHERE t.id_turno = ?`,
             [id]
         );
@@ -935,9 +936,10 @@ router.delete('/:id', [
         // Primero obtener los datos del turno antes de eliminarlo
         const [turnoRows] = await pool.query(
             `SELECT t.id_turno, t.id_cancha, t.fecha_turno, t.duracion, t.precio, t.estado, 
-                    u.email as email_usuario, u.nombre as nombre_usuario
+                    u.email as email_usuario, u.nombre as nombre_usuario, c.tipo_cancha
              FROM turnos t
              LEFT JOIN usuarios u ON t.id_usuario = u.id_usuario
+             LEFT JOIN canchas c ON t.id_cancha = c.id
              WHERE t.id_turno = ?`,
             [id]
         );
@@ -959,7 +961,8 @@ router.delete('/:id', [
                     nombre: turno.nombre_usuario,
                     id_cancha: turno.id_cancha,
                     fechaMysql: turno.fecha_turno,
-                    precio: turno.precio
+                    precio: turno.precio,
+                    tipo_cancha: turno.tipo_cancha
                 });
 
                 console.log(`Correo de cancelación enviado a: ${turno.email_usuario}`);

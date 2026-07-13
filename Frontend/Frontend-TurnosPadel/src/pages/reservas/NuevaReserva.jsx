@@ -60,7 +60,6 @@ const NuevaReserva = ({
         id_cancha: canchaId || '',
         email_usuario: isAdmin ? '' : (user?.email || ''),
         nombre_usuario: isAdmin ? '' : (user?.nombre || ''),
-        tipo_cancha: '',
         fecha: '',
         hora: '',
         duracion: 60,
@@ -122,8 +121,7 @@ const NuevaReserva = ({
             setFormData(prev => ({
                 ...prev,
                 id_cancha: canchaId,
-                precio: data.precio || '',
-                tipo_cancha: data.tipo_cancha || 'Padel'
+                precio: data.precio || ''
             }));
         } catch (err) {
             console.error('Error cargando cancha:', err);
@@ -235,14 +233,13 @@ const NuevaReserva = ({
     const handleChange = (e) => {
         const { name, value } = e.target;
 
-        // Si se cambia la cancha, actualizar también el precio y tipo_cancha
+        // Si se cambia la cancha, actualizar también el precio
         if (name === 'id_cancha' && !canchaId) {
             const canchaSelecionada = canchas.find(c => c.id_cancha === parseInt(value));
             setFormData(prev => ({
                 ...prev,
                 [name]: value,
-                precio: canchaSelecionada?.precio || '',
-                tipo_cancha: canchaSelecionada?.tipo_cancha || ''
+                precio: canchaSelecionada?.precio || ''
             }));
         } else {
             setFormData(prev => ({
@@ -334,7 +331,7 @@ const NuevaReserva = ({
             nombre: formData.nombre_usuario,
             email: formData.email_usuario,
             estado: formData.estado,
-            tipo_cancha: formData.tipo_cancha,
+            tipo_cancha: canchaInfo?.tipo_cancha || 'No especificado',
             nombreCancha: `Cancha ${canchaInfo?.id_cancha}`,
             warning: validacion.warning || null
         });
@@ -354,7 +351,6 @@ const NuevaReserva = ({
             const reservaData = {
                 id_usuario: isAdmin ? null : (user?.userId || user?.id || null),
                 id_cancha: parseInt(formData.id_cancha),
-                tipo_cancha: formData.tipo_cancha || canchaSeleccionada?.tipo_cancha || 'Padel',
                 fecha_turno: fechaHora,
                 duracion: parseInt(formData.duracion),
                 precio: parseFloat(formData.precio),
