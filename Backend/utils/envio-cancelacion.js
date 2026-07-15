@@ -26,7 +26,7 @@ export const enviarCorreoCancelacionReserva = async ({ email, nombre, id_cancha,
         await enviarCorreo({
             destinatario: email,
             asunto: 'Cancelación de Reserva',
-            contenidoHTML: `
+            contenidoHTML: ` 
                 <h1>Reserva Cancelada</h1>
                 <p>Hola ${nombre || 'Cliente'},</p>
                 <p>Tu reserva para la cancha ${id_cancha} ha sido cancelada.</p>

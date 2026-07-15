@@ -65,6 +65,8 @@ export const enviarCorreoConfirmacionReserva = async ({ email, nombre, id_cancha
                     <li><strong>Horario:</strong> ${horaTexto}</li>
                     <li><strong>Precio:</strong> $${precio}</li>
                 </ul>
+                <p>Si tienes alguna pregunta, no dudes en contactarnos.</p>
+                <a href="https://wa.me/+5493515606326" target="_blank" style="display:inline-block;padding:10px 20px;margin-top:10px;background-color:#25D366;color:white;text-decoration:none;border-radius:5px;">Contactar por WhatsApp</a>
                 <p>¡Gracias por elegirnos!</p>
             `
         });

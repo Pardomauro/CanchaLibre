@@ -17,8 +17,12 @@ const transporter = nodemailer.createTransport({
         pass: process.env.EMAIL_PASS  // Contraseña de aplicación de Gmail
     },
     tls: {
-        rejectUnauthorized: false
-    }
+        rejectUnauthorized: false,
+        minVersion: 'TLSv1.2'
+    },
+    connectionTimeout: 10000, // 10 segundos
+    greetingTimeout: 10000,
+    socketTimeout: 10000
 });
 
 // Función para enviar correos electrónicos
