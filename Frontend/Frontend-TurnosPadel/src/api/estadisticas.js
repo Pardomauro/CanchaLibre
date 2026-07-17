@@ -164,3 +164,76 @@ export const obtenerIngresosMes = async (tokenOverride) => {
         throw error;
     }
 };
+
+// NUEVOS ENDPOINTS
+export const obtenerTipoCanchas = async (tokenOverride) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/estadisticas/tipo-canchas`, {
+            method: 'GET',
+            headers: getAuthHeaders(tokenOverride)
+        });
+
+        if (!response.ok) {
+            const errorData = await leerErrorRespuesta(response);
+            const message = errorData?.message || 'Error al obtener estadísticas de tipo de canchas';
+            const err = new Error(message);
+            err.status = response.status;
+            err.data = errorData;
+            throw err;
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error al obtener tipo de canchas:', error);
+        throw error;
+    }
+};
+
+export const obtenerTopUsuarios = async (tokenOverride) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/estadisticas/top-usuarios`, {
+            method: 'GET',
+            headers: getAuthHeaders(tokenOverride)
+        });
+
+        if (!response.ok) {
+            const errorData = await leerErrorRespuesta(response);
+            const message = errorData?.message || 'Error al obtener top usuarios';
+            const err = new Error(message);
+            err.status = response.status;
+            err.data = errorData;
+            throw err;
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error al obtener top usuarios:', error);
+        throw error;
+    }
+};
+
+export const obtenerHorariosMasReservados = async (tokenOverride) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/estadisticas/horarios-mas-reservados`, {
+            method: 'GET',
+            headers: getAuthHeaders(tokenOverride)
+        });
+
+        if (!response.ok) {
+            const errorData = await leerErrorRespuesta(response);
+            const message = errorData?.message || 'Error al obtener horarios más reservados';
+            const err = new Error(message);
+            err.status = response.status;
+            err.data = errorData;
+            throw err;
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error al obtener horarios más reservados:', error);
+        throw error;
+    }
+};

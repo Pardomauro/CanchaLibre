@@ -42,11 +42,15 @@ router.get('/', [protegerRuta, verificarAdmin], async (req, res) => {
             FROM usuarios
         `);
 
-        // Obtener ingresos del mes actual
+        // Obtener ingresos del mes actual (completo si 'completado', mitad si 'reservado')
         const [ingresosMes] = await pool.query(`
-            SELECT COALESCE(SUM(precio), 0) as total 
-            FROM turnos 
-            WHERE YEAR(fecha_turno) = YEAR(CURDATE()) 
+            SELECT COALESCE(SUM(CASE 
+                WHEN estado = 'completado' THEN precio
+                WHEN estado = 'reservado' THEN precio / 2
+                ELSE 0 END
+            ), 0) as total
+            FROM turnos
+            WHERE YEAR(fecha_turno) = YEAR(CURDATE())
             AND MONTH(fecha_turno) = MONTH(CURDATE())
             AND estado IN ('reservado', 'completado')
         `);
@@ -105,21 +109,22 @@ router.get('/canchas', [protegerRuta, verificarAdmin], async (req, res) => {
             success: false,
             message: 'Error interno al obtener estadísticas de canchas',
             error: error.message
-        });
+        }); 
     }
 });
 
-{/*NUEVO*/}
+// NUEVO
 // GET /api/estadisticas/tipo-canchas - Estadísticas de tipo de canchas con más reservas
 router.get('/tipo-canchas', [protegerRuta, verificarAdmin], async (req, res) => {
     try {
         const [estadisticas] = await pool.query(`
             SELECT 
-                c.tipo,
-                COUNT(t.id) as reservas
+                c.tipo_cancha,
+                COUNT(t.id_turno) as reservas
             FROM canchas c
             LEFT JOIN turnos t ON c.id = t.id_cancha AND t.estado IN ('completado')
-            GROUP BY c.tipo
+            GROUP BY c.tipo_cancha
+            ORDER BY reservas DESC
         `);
         res.status(200).json({
             success: true,
@@ -131,6 +136,65 @@ router.get('/tipo-canchas', [protegerRuta, verificarAdmin], async (req, res) => 
         res.status(500).json({
             success: false,
             message: 'Error interno al obtener estadísticas de tipo de canchas',
+            error: error.message
+        });
+    }
+});
+
+// NUEVO
+// Estadística de los 5 usuarios que más reservas han hecho, que tengan estado "completado"
+router.get('/top-usuarios', [protegerRuta, verificarAdmin], async (req, res) => {
+    try { 
+        const [estadisticas] = await pool.query(`
+            SELECT 
+                u.nombre,
+                u.email,
+                COUNT(t.id_turno) as reservas
+            FROM usuarios u
+            LEFT JOIN turnos t ON u.id_usuario = t.id_usuario AND t.estado = 'completado'
+            GROUP BY u.id_usuario, u.nombre, u.email
+            ORDER BY reservas DESC
+            LIMIT 5
+        `);
+        res.status(200).json({
+            success: true,
+            message: 'Top 5 usuarios con más reservas obtenidas correctamente',
+            data: estadisticas
+        });
+    } catch (error) {
+        console.error('Error al obtener top 5 usuarios con más reservas:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno al obtener top 5 usuarios con más reservas',
+            error: error.message
+        });
+    }
+});
+
+// NUEVO
+// Estadística de los horarios más reservados, considerando solo los turnos con estado "completado"
+router.get('/horarios-mas-reservados', [protegerRuta, verificarAdmin], async (req, res) => {
+    try {
+        const [estadisticas] = await pool.query(`
+            SELECT
+                HOUR(fecha_turno) as hora,
+                COUNT(*) as reservas
+            FROM turnos
+            WHERE estado = 'completado'
+            GROUP BY HOUR(fecha_turno)
+            ORDER BY reservas DESC
+            LIMIT 5
+        `);
+        res.status(200).json({
+            success: true,
+            message: 'Horarios más reservados obtenidos correctamente',
+            data: estadisticas
+        });
+    } catch (error) {
+        console.error('Error al obtener horarios más reservados:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno al obtener horarios más reservados',
             error: error.message
         });
     }
@@ -202,10 +266,16 @@ router.get('/ingresos', [protegerRuta, verificarAdmin], async (req, res) => {
     try {
         const [estadisticas] = await pool.query(`
             SELECT 
-                COALESCE(SUM(CASE WHEN MONTH(fecha_turno) = MONTH(CURDATE()) THEN precio END), 0) as mes_actual,
-                COALESCE(SUM(CASE WHEN MONTH(fecha_turno) = MONTH(DATE_SUB(CURDATE(), INTERVAL 1 MONTH)) THEN precio END), 0) as mes_anterior,
-                COALESCE(SUM(CASE WHEN YEAR(fecha_turno) = YEAR(CURDATE()) THEN precio END), 0) as año_actual,
-                COALESCE(SUM(precio), 0) as total
+                COALESCE(SUM(CASE WHEN MONTH(fecha_turno) = MONTH(CURDATE()) THEN (
+                    CASE WHEN estado = 'completado' THEN precio WHEN estado = 'reservado' THEN precio/2 ELSE 0 END
+                ) END), 0) as mes_actual,
+                COALESCE(SUM(CASE WHEN MONTH(fecha_turno) = MONTH(DATE_SUB(CURDATE(), INTERVAL 1 MONTH)) THEN (
+                    CASE WHEN estado = 'completado' THEN precio WHEN estado = 'reservado' THEN precio/2 ELSE 0 END
+                ) END), 0) as mes_anterior,
+                COALESCE(SUM(CASE WHEN YEAR(fecha_turno) = YEAR(CURDATE()) THEN (
+                    CASE WHEN estado = 'completado' THEN precio WHEN estado = 'reservado' THEN precio/2 ELSE 0 END
+                ) END), 0) as año_actual,
+                COALESCE(SUM(CASE WHEN estado = 'completado' THEN precio WHEN estado = 'reservado' THEN precio/2 ELSE 0 END), 0) as total
             FROM turnos 
             WHERE estado IN ('reservado', 'completado')
         `);
