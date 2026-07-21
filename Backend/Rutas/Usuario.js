@@ -108,8 +108,7 @@ router.get('/:id', [
         const [rows] = await pool.query(`SELECT 
             id_usuario, 
             nombre, 
-            email,
-            celular
+            email 
             FROM usuarios 
             WHERE id_usuario = ?`, [id]);
 
@@ -281,19 +280,9 @@ router.put('/:id', [
         const { id } = req.params;
         const { nombre, email, celular, password } = req.body;
 
-        const usuarioAutenticadoId = req.usuario?.id || req.usuario?.userId;
-        const esAdministrador = req.usuario?.rol === 'administrador';
-
-        if (!esAdministrador && String(usuarioAutenticadoId) !== String(id)) {
-            return res.status(403).json({
-                success: false,
-                message: 'No tienes permiso para editar este usuario'
-            });
-        }
-
         // Verificar que el usuario exista
         const [usuarioExistente] = await pool.execute(
-            'SELECT id_usuario, nombre, email, celular FROM usuarios WHERE id_usuario = ?',
+            'SELECT id_usuario FROM usuarios WHERE id_usuario = ?',
             [id]
         );
 
@@ -314,7 +303,7 @@ router.put('/:id', [
         }
 
         // Validar formato de email
-        if (email !== undefined && !validarEmail(email)) {
+        if (!validarEmail(email)) {
             return res.status(400).json({
                 success: false,
                 message: 'El formato del email no es válido'
@@ -322,7 +311,6 @@ router.put('/:id', [
         }
 
         // Verificar si el nuevo email ya está en uso por otro usuario
-        if (email !== undefined) {
         const [usuario] = await pool.execute(
             'SELECT id_usuario FROM usuarios WHERE email = ? AND id_usuario != ?',
             [email.toLowerCase(), id]
@@ -336,25 +324,8 @@ router.put('/:id', [
         }
 
         // Construir la consulta de actualización
-        }
-
-        const camposActualizar = [];
-        const actualizarParametros = [];
-
-        if (nombre !== undefined) {
-            camposActualizar.push('nombre = ?');
-            actualizarParametros.push(nombre.trim());
-        }
-
-        if (email !== undefined) {
-            camposActualizar.push('email = ?');
-            actualizarParametros.push(email.toLowerCase());
-        }
-
-        if (celular !== undefined) {
-            camposActualizar.push('celular = ?');
-            actualizarParametros.push(celular.trim());
-        }
+        let actualizarConsulta = 'UPDATE usuarios SET nombre = ?, email = ?, celular = ?';
+        const actualizarParametros = [nombre.trim(), email.toLowerCase(), celular.trim()];
 
         // Verificar si se proporciona una nueva contraseña
         if (password) {
@@ -369,25 +340,19 @@ router.put('/:id', [
             // Hashear la nueva contraseña
             const saltRounds = 10;
             const hashedPassword = await bcrypt.hash(password, saltRounds);
-            camposActualizar.push('password = ?');
+            actualizarConsulta += ', password = ?';
             actualizarParametros.push(hashedPassword);
         }
 
-        const actualizarConsulta = `UPDATE usuarios SET ${camposActualizar.join(', ')} WHERE id_usuario = ?`;
+        actualizarConsulta += ' WHERE id_usuario = ?';
         actualizarParametros.push(id);
 
         // Ejecutar la consulta de actualización
         await pool.execute(actualizarConsulta, actualizarParametros);
 
-        const [usuarioActualizado] = await pool.execute(
-            'SELECT id_usuario, nombre, email, celular FROM usuarios WHERE id_usuario = ?',
-            [id]
-        );
-
         res.json({
             success: true,
-            message: 'Usuario actualizado exitosamente',
-            data: usuarioActualizado[0]
+            message: 'Usuario actualizado exitosamente'
         });
 
     } catch (error) {
@@ -562,5 +527,6 @@ router.post('/verificar-codigo', [
     });
   }
 });
+
 
 export default router;
