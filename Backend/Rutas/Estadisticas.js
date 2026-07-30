@@ -144,18 +144,34 @@ router.get('/tipo-canchas', [protegerRuta, verificarAdmin], async (req, res) => 
 // NUEVO
 // Estadística de los 5 usuarios que más reservas han hecho, que tengan estado "completado"
 router.get('/top-usuarios', [protegerRuta, verificarAdmin], async (req, res) => {
-    try { 
-        const [estadisticas] = await pool.query(`
+    try {
+        // Permitir filtrar por estado mediante query param: ?estado=completado|reservado|all
+        const estadoQuery = (req.query.estado || 'completado').toString();
+        let estadoCondicion = '';
+        let params = [];
+
+        if (estadoQuery !== 'all') {
+            // soportar múltiples estados separados por coma
+            const estados = estadoQuery.split(',').map(s => s.trim()).filter(Boolean);
+            const placeholders = estados.map(() => '?').join(',');
+            estadoCondicion = ` AND t.estado IN (${placeholders})`;
+            params = estados;
+        }
+
+        const sql = `
             SELECT 
                 u.nombre,
                 u.email,
                 COUNT(t.id_turno) as reservas
             FROM usuarios u
-            LEFT JOIN turnos t ON u.id_usuario = t.id_usuario AND t.estado = 'completado'
+            LEFT JOIN turnos t ON u.id_usuario = t.id_usuario ${estadoCondicion}
             GROUP BY u.id_usuario, u.nombre, u.email
             ORDER BY reservas DESC
             LIMIT 5
-        `);
+        `;
+
+        const [estadisticas] = await pool.query(sql, params);
+
         res.status(200).json({
             success: true,
             message: 'Top 5 usuarios con más reservas obtenidas correctamente',

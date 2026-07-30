@@ -266,7 +266,7 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Nuevas estadísticas mejoradas: Top usuarios, Tipo de canchas, Horarios */}
-                <div className="mt-6 sm:mt-8">
+                <div className="mt-6 sm:mt-8 bg-white rounded-2xl shadow-xl p-6">
                     <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
                         <svg className="w-6 h-6 mr-2 text-[#588157]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -275,7 +275,7 @@ const AdminDashboard = () => {
                     </h3>
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Top 5 Usuarios */}
-                        <div className="bg-gradient-to-br from-white to-[#DAD7CD]/20 rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-shadow duration-300">
+                        <div className="bg-white rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-all duration-300">
                             <div className="flex items-center justify-between mb-5">
                                 <h4 className="text-lg font-bold text-gray-800 flex items-center">
                                     <svg className="w-5 h-5 mr-2 text-[#588157]" fill="currentColor" viewBox="0 0 20 20">
@@ -283,7 +283,7 @@ const AdminDashboard = () => {
                                     </svg>
                                     Top 5 Usuarios
                                 </h4>
-                                <span className="text-xs px-2 py-1 bg-[#588157] text-white rounded-full font-semibold">
+                                <span className="inline-flex items-center text-xs px-2 py-1 bg-[#588157] text-white rounded-full font-semibold">
                                     Completados
                                 </span>
                             </div>
@@ -310,7 +310,7 @@ const AdminDashboard = () => {
                                         const medals = ['🥇', '🥈', '🥉'];
                                         const medal = medals[idx] || '🏅';
                                         return (
-                                            <div key={idx} className="flex items-center justify-between p-3 bg-gradient-to-r from-[#DAD7CD]/30 to-transparent rounded-lg hover:from-[#A3B18A]/30 transition-all duration-200">
+                                            <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all duration-200">
                                                 <div className="flex items-center space-x-3 flex-1 min-w-0">
                                                     <span className="text-2xl flex-shrink-0">{medal}</span>
                                                     <div className="min-w-0 flex-1">
@@ -331,7 +331,7 @@ const AdminDashboard = () => {
                         </div>
 
                         {/* Tipos de Canchas */}
-                        <div className="bg-gradient-to-br from-white to-[#A3B18A]/20 rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-shadow duration-300">
+                        <div className="bg-white rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-all duration-300">
                             <div className="flex items-center justify-between mb-5">
                                 <h4 className="text-lg font-bold text-gray-800 flex items-center">
                                     <svg className="w-5 h-5 mr-2 text-[#588157]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -339,7 +339,7 @@ const AdminDashboard = () => {
                                     </svg>
                                     Tipos de Canchas
                                 </h4>
-                                <span className="text-xs px-2 py-1 bg-[#A3B18A] text-white rounded-full font-semibold">
+                                <span className="inline-flex items-center text-xs px-2 py-1 bg-[#A3B18A] text-white rounded-full font-semibold">
                                     Ranking
                                 </span>
                             </div>
@@ -364,7 +364,7 @@ const AdminDashboard = () => {
                                         return tipoCanchas.map((t, idx) => {
                                             const porcentaje = (t.reservas / maxReservas) * 100;
                                             return (
-                                                <div key={idx} className="space-y-2">
+                                                <div key={idx} className="space-y-2 p-3 bg-gray-50 rounded-lg">
                                                     <div className="flex justify-between items-center">
                                                         <span className="text-sm font-semibold text-gray-700">{t.tipo_cancha || t.tipo}</span>
                                                         <span className="text-sm font-bold text-[#588157]">{t.reservas}</span>
@@ -384,7 +384,7 @@ const AdminDashboard = () => {
                         </div>
 
                         {/* Horarios más reservados */}
-                        <div className="bg-gradient-to-br from-white to-[#588157]/20 rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-shadow duration-300">
+                        <div className="bg-white rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-all duration-300">
                             <div className="flex items-center justify-between mb-5">
                                 <h4 className="text-lg font-bold text-gray-800 flex items-center">
                                     <svg className="w-5 h-5 mr-2 text-[#588157]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -392,7 +392,7 @@ const AdminDashboard = () => {
                                     </svg>
                                     Horarios Top
                                 </h4>
-                                <span className="text-xs px-2 py-1 bg-[#3A5A40] text-white rounded-full font-semibold">
+                                <span className="inline-flex items-center text-xs px-2 py-1 bg-[#3A5A40] text-white rounded-full font-semibold">
                                     Pico
                                 </span>
                             </div>

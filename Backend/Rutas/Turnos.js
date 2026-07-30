@@ -106,6 +106,7 @@ router.get('/', [
                 t.fecha_actualizacion,
                 u.nombre as nombre_usuario,
                 u.email as email_usuario,
+                    u.celular as celular_usuario,
                 c.tipo_cancha
              FROM turnos t
              LEFT JOIN usuarios u ON t.id_usuario = u.id_usuario
@@ -152,6 +153,7 @@ router.get('/usuario/:userId', [
                 t.fecha_actualizacion,
                 u.nombre as nombre_usuario,
                 u.email as email_usuario,
+                u.celular as celular_usuario,
                 c.tipo_cancha
             FROM turnos t
             LEFT JOIN usuarios u ON t.id_usuario = u.id_usuario
@@ -176,8 +178,12 @@ router.get('/usuario/:userId', [
             t.estado,
             t.fecha_creacion,
             t.fecha_actualizacion,
+            u.nombre as nombre_usuario,
+            u.email as email_usuario,
+            u.celular as celular_usuario,
             c.tipo_cancha
         FROM turnos t
+        LEFT JOIN usuarios u ON t.id_usuario = u.id_usuario
         LEFT JOIN canchas c ON t.id_cancha = c.id
         WHERE t.id_usuario = ?
         ORDER BY t.fecha_turno DESC`, [userId]);
@@ -200,20 +206,24 @@ router.get('/:id', [
     try {
         const { id } = req.params;
 
-        const [rows] = await pool.query(`SELECT
-            t.id_turno,
-            t.id_usuario,
-            t.id_cancha,
-            t.fecha_turno,
-            t.duracion,
-            t.precio,
-            t.estado,
-            t.fecha_creacion,
-            t.fecha_actualizacion,
-            c.tipo_cancha
-        FROM turnos t
-        LEFT JOIN canchas c ON t.id_cancha = c.id
-        WHERE t.id_turno = ?`, [id]);
+            const [rows] = await pool.query(`SELECT
+                t.id_turno,
+                t.id_usuario,
+                t.id_cancha,
+                t.fecha_turno,
+                t.duracion,
+                t.precio,
+                t.estado,
+                t.fecha_creacion,
+                t.fecha_actualizacion,
+                u.nombre as nombre_usuario,
+                u.email as email_usuario,
+                u.celular as celular_usuario,
+                c.tipo_cancha
+            FROM turnos t
+            LEFT JOIN usuarios u ON t.id_usuario = u.id_usuario
+            LEFT JOIN canchas c ON t.id_cancha = c.id
+            WHERE t.id_turno = ?`, [id]);
 
         if (rows.length === 0) {
             return res.status(404).json({
@@ -655,10 +665,17 @@ router.post('/', [
 
         const estadoFinal = esAdministrador ? estado : 'pendiente de pago';
 
+        // Obtener el tipo de cancha desde la tabla canchas para almacenarlo en el turno
+        const [canchaTipoRows] = await pool.query(
+            'SELECT tipo_cancha FROM canchas WHERE id = ?',
+            [id_cancha]
+        );
+        const tipo_cancha_turno = canchaTipoRows[0]?.tipo_cancha || 'Padel';
+
         const [result] = await pool.query(`INSERT INTO turnos
-            (id_usuario, id_cancha, fecha_turno, duracion, precio, estado)
-            VALUES (?, ?, ?, ?, ?, ?)`,
-            [idUsuarioFinal, id_cancha, fechaMysql, duracion, precio, estadoFinal]);
+            (id_usuario, id_cancha, fecha_turno, duracion, precio, estado, tipo_cancha)
+            VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [idUsuarioFinal, id_cancha, fechaMysql, duracion, precio, estadoFinal, tipo_cancha_turno]);
 
         const debeEnviarConfirmacion = estadoFinal === 'reservado' && (email || esAdministrador);
 
@@ -667,20 +684,14 @@ router.post('/', [
             try {
                 const emailDestinatario = email || null;
                 if (emailDestinatario) {
-                    // Obtener tipo_cancha desde la tabla canchas
-                    const [canchaRows] = await pool.query(
-                        'SELECT tipo_cancha FROM canchas WHERE id = ?',
-                        [id_cancha]
-                    );
-                    const tipo_cancha = canchaRows[0]?.tipo_cancha || 'No especificado';
-
+                    // Usar el tipo de cancha ya obtenido al insertar el turno
                     await enviarCorreoConfirmacionReserva({
                         email: emailDestinatario,
                         nombre,
                         id_cancha,
                         fechaMysql,
                         precio,
-                        tipo_cancha
+                        tipo_cancha: tipo_cancha_turno || 'No especificado'
                     });
                     console.log('✅ Correo de confirmación enviado a:', emailDestinatario);
                 }
@@ -715,7 +726,7 @@ router.post('/:id/confirmar', [
 
         const [turnoRows] = await pool.query(
             `SELECT t.id_turno, t.id_usuario, t.id_cancha, t.fecha_turno, t.duracion, t.precio, t.estado,
-                    u.email as email_usuario, u.nombre as nombre_usuario, c.tipo_cancha
+                    u.email as email_usuario, u.nombre as nombre_usuario, u.celular as celular_usuario, c.tipo_cancha
              FROM turnos t
              LEFT JOIN usuarios u ON t.id_usuario = u.id_usuario
              LEFT JOIN canchas c ON t.id_cancha = c.id
@@ -747,7 +758,7 @@ router.post('/:id/confirmar', [
 
         const [turnoActualizadoRows] = await pool.query(
             `SELECT t.id_turno, t.id_usuario, t.id_cancha, t.fecha_turno, t.duracion, t.precio, t.estado,
-                    u.email as email_usuario, u.nombre as nombre_usuario, c.tipo_cancha
+                    u.email as email_usuario, u.nombre as nombre_usuario, u.celular as celular_usuario, c.tipo_cancha
              FROM turnos t
              LEFT JOIN usuarios u ON t.id_usuario = u.id_usuario
              LEFT JOIN canchas c ON t.id_cancha = c.id
@@ -810,7 +821,7 @@ router.put('/:id', [
 
         const [turnoAnteriorRows] = await pool.query(
             `SELECT t.id_turno, t.id_usuario, t.id_cancha, t.fecha_turno, t.duracion, t.precio, t.estado,
-                    u.email as email_usuario, u.nombre as nombre_usuario, c.tipo_cancha
+                    u.email as email_usuario, u.nombre as nombre_usuario, u.celular as celular_usuario, c.tipo_cancha
              FROM turnos t
              LEFT JOIN usuarios u ON t.id_usuario = u.id_usuario
              LEFT JOIN canchas c ON t.id_cancha = c.id
@@ -879,7 +890,7 @@ router.put('/:id', [
 
         const [turnoActualizadoRows] = await pool.query(
             `SELECT t.id_turno, t.id_usuario, t.id_cancha, t.fecha_turno, t.duracion, t.precio, t.estado,
-                    u.email as email_usuario, u.nombre as nombre_usuario, c.tipo_cancha
+                    u.email as email_usuario, u.nombre as nombre_usuario, u.celular as celular_usuario, c.tipo_cancha
              FROM turnos t
              LEFT JOIN usuarios u ON t.id_usuario = u.id_usuario
              LEFT JOIN canchas c ON t.id_cancha = c.id
@@ -936,7 +947,7 @@ router.delete('/:id', [
         // Primero obtener los datos del turno antes de eliminarlo
         const [turnoRows] = await pool.query(
             `SELECT t.id_turno, t.id_cancha, t.fecha_turno, t.duracion, t.precio, t.estado, 
-                    u.email as email_usuario, u.nombre as nombre_usuario, c.tipo_cancha
+                    u.email as email_usuario, u.nombre as nombre_usuario, u.celular as celular_usuario, c.tipo_cancha
              FROM turnos t
              LEFT JOIN usuarios u ON t.id_usuario = u.id_usuario
              LEFT JOIN canchas c ON t.id_cancha = c.id

@@ -190,9 +190,10 @@ export const obtenerTipoCanchas = async (tokenOverride) => {
     }
 };
 
-export const obtenerTopUsuarios = async (tokenOverride) => {
+export const obtenerTopUsuarios = async (tokenOverride, estado = 'completado') => {
     try {
-        const response = await fetch(`${API_BASE_URL}/estadisticas/top-usuarios`, {
+        const qs = estado ? `?estado=${encodeURIComponent(estado)}` : '';
+        const response = await fetch(`${API_BASE_URL}/estadisticas/top-usuarios${qs}`, {
             method: 'GET',
             headers: getAuthHeaders(tokenOverride)
         });
