@@ -1,6 +1,6 @@
-# 🎾 Sistema de Gestión de Turnos Pádel
+# 🎾 Sistema de Gestión de Turnos para Complejos Deportivos
 
-Sistema completo de gestión de canchas y reservas de pádel con interfaz moderna, sistema de confirmaciones críticas y panel administrativo avanzado.
+Sistema completo de gestión de canchas y reservas deportivas con interfaz moderna, sistema de confirmaciones críticas y panel administrativo avanzado.
 
 ## ✨ Características Principales
 
@@ -115,20 +115,23 @@ Sistema_TurnosPadel/
 │   ├── middlewares/             # 🛡️ Validaciones y seguridad
 │   ├── Servicios/               # 📧 Email y autenticación
 │   └── scripts/                 # 🔧 Utilidades (crear admin)
+│   └── tests/                   # 🔧 Testeos para configuraciones (emails)
+
 │
 └── Frontend/Frontend-TurnosPadel/  # 🖥️ Interfaz React
     ├── src/
     │   ├── api/                 # 🔌 Conexión con backend
     │   ├── components/          # 🧩 Componentes React
+    │   │   ├── auth/
     │   │   ├── accionesCriticas/    # 🔒 Sistema de confirmación
-    │   │   ├── admin/              # 👨‍💼 Panel administrativo
-    |   |   ├── auth/               # 🛡️ Autenticación
-    │   │   ├── canchas/            # 🏓 Gestión de canchas
-    │   │   ├── reservas/           # 📅 Sistema de reservas
-    │   │   ├── usuarios/           # 👤 Autenticación
     │   │   ├── rutas/              # 🗺️ Rutas de navegación
     │   │   └── navegacion/         # 🧭 Navegación
     │   ├── config/             #  🔧 Configuración para credenciales de Admin
+    │   ├── pages/             #  🔧 Configuración para credenciales de Admin
+    │   │   ├── admin/
+    │   │   ├── canchas/
+    │   │   ├── reservas/
+    │   │   ├── usuario/
     │   ├── context/            # 🌐 Estado global (Auth)
     │   └── utils/              # 🛠️ Utilidades
     └── package.json
