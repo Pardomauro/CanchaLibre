@@ -183,35 +183,56 @@ const NuevaReserva = ({
     const cargarHorariosDisponibles = async () => {
         try {
             setError('');
-            const responseReservas = await obtenerHorariosDisponibles(
-                formData.id_cancha,
-                formData.fecha,
-                60
+
+            // obtener lista de reservas (ocupados) y horarios disponibles
+            const responseReservas = await obtenerHorariosDisponibles(formData.id_cancha, formData.fecha, 60);
+            const response = await obtenerHorariosDisponibles(formData.id_cancha, formData.fecha, formData.duracion);
+
+            const reservasExistentes = responseReservas?.data?.horarios_ocupados || [];
+            const horariosOriginales = response?.data?.horarios_disponibles || [];
+
+            // Determinar anticipación en minutos (preferir cancha, sino 120 minutos)
+            const canchaInfo = canchaSeleccionada || canchas.find(c => String(c.id_cancha) === String(formData.id_cancha));
+            const minutosAnticipacion = Number(canchaInfo?.minutos_anticipacion ?? canchaInfo?.anticipacion_minutos ?? (2 * 60)) || (2 * 60);
+
+            // calcular cutoff (ahora + anticipación)
+            const ahora = new Date();
+            const cutoff = new Date(ahora.getTime() + minutosAnticipacion * 60 * 1000);
+
+            // parsear fecha seleccionada
+            const [y, m, d] = String(formData.fecha || '').split('-').map(Number);
+
+            const parseSlotToDate = (slot) => {
+                // slot puede venir como { hora: '08:00', horario: '08:00 - 09:00' } o como string
+                let horaStr = '';
+                if (!slot) return null;
+                if (typeof slot === 'string') horaStr = slot;
+                else if (slot.hora) horaStr = slot.hora;
+                else if (slot.horario) horaStr = String(slot.horario).split('-')[0].trim();
+
+                const [hh, mm] = String(horaStr).split(':').map(Number);
+                if (Number.isNaN(hh) || Number.isNaN(mm)) return null;
+                return new Date(y, (m || 1) - 1, d || 1, hh, mm, 0);
+            };
+
+            const filtrarPasados = (lista) => lista.filter(item => {
+                const fechaSlot = parseSlotToDate(item.hora ? item : (item));
+                if (!fechaSlot) return true; // no conocemos, mantener
+                return fechaSlot >= cutoff;
+            });
+
+            const horariosFiltrados = filtrarHorariosSinSuperposicion(
+                filtrarPasados(horariosOriginales),
+                formData.duracion,
+                reservasExistentes
             );
 
-            if (responseReservas.success) {
-                setTodasLasReservas(responseReservas.data.horarios_ocupados || []);
-            }
+            const ocupadosFiltrados = filtrarPasados(reservasExistentes);
 
-            const response = await obtenerHorariosDisponibles(
-                formData.id_cancha,
-                formData.fecha,
-                formData.duracion
-            );
+            setHorariosDisponibles(horariosFiltrados);
+            setHorariosOcupados(ocupadosFiltrados);
+            setTodasLasReservas(ocupadosFiltrados);
 
-            if (response.success) {
-                const horariosOriginales = response.data.horarios_disponibles || [];
-                const reservasExistentes = responseReservas?.data?.horarios_ocupados || [];
-
-                const horariosFiltrados = filtrarHorariosSinSuperposicion(
-                    horariosOriginales,
-                    formData.duracion,
-                    reservasExistentes
-                );
-
-                setHorariosDisponibles(horariosFiltrados);
-                setHorariosOcupados(response.data.horarios_ocupados || []);
-            }
         } catch (err) {
             console.error('Error al cargar horarios:', err);
             setHorariosDisponibles([]);
@@ -255,22 +276,6 @@ const NuevaReserva = ({
     const validarFormulario = () => {
         if (!formData.id_cancha) {
             setError('Debes seleccionar una cancha');
-            return false;
-        }
-
-        if (!formData.nombre_usuario.trim()) {
-            setError('El nombre del usuario es obligatorio');
-            return false;
-        }
-
-        if (!formData.email_usuario.trim()) {
-            setError('El email del usuario es obligatorio');
-            return false;
-        }
-
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(formData.email_usuario)) {
-            setError('El email no tiene un formato válido');
             return false;
         }
 
@@ -1028,5 +1033,4 @@ const NuevaReserva = ({
         </div>
     );
 };
-
 export default NuevaReserva;
