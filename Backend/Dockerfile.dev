@@ -1,0 +1,14 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+RUN npm i -g nodemon
+COPY package*.json ./
+RUN npm install
+
+# Copiar el resto del código para desarrollo (se puede usar bind-mount en docker-compose)
+COPY . .
+
+EXPOSE 3000
+
+CMD ["nodemon", "app.js"]

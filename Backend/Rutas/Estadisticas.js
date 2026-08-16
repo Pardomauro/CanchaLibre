@@ -1,6 +1,6 @@
 import express from 'express';
 import { pool } from '../config/db.js';
-import { protegerRuta } from '../Servicios/token.js';
+import { protegerRuta } from '../servicios/token.js';
 
 const router = express.Router();
 

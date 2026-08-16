@@ -1,0 +1,77 @@
+services:
+  # ----------------------------------------------------
+  # 1. BASE DE DATOS (MySQL)
+  # ----------------------------------------------------
+  mysql_db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: pardomauro2
+      MYSQL_DATABASE: sistema_turnos_2025
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  # ----------------------------------------------------
+  # 2. BACKEND (Node.js + Express)
+  # ----------------------------------------------------
+  backend:
+    build: 
+      context: ./Backend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    environment:
+      - DB_HOST=mysql_db
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=pardomauro2
+      - DB_DATABASE=sistema_turnos_2025
+      - DB_NAME=sistema_turnos_2025
+      # --- Credenciales de correo electrónico para enviar confirmaciones y notificaciones ---
+      - EMAIL_SERVICE=gmail
+      - EMAIL_HOST=smtp.gmail.com
+      - EMAIL_PORT=587
+      - EMAIL_SECURE=false
+      - EMAIL_USER=canchalibre4@gmail.com
+      - EMAIL_PASS=zohkghutboxptzoh
+      # JWT secret key for authentication
+      - JWT_SECRET=SistemaTurnos2025_contraseñaSecreta_ClaveJWT
+      - JWT_EXPIRES_IN=24h
+      # ============================================
+      # ============================================
+      # CONFIGURACIÓN DEL ADMINISTRADOR POR DEFECTO
+      # ============================================
+      - ADMIN_EMAIL=sistematurnos2025@gmail.com
+      - ADMIN_PASSWORD=Sistematurnos2025.@
+      - ADMIN_NAME=AdministradorSistema
+      - ADMIN_CELULAR=3515606326
+    volumes:
+      - ./Backend:/app
+      - /app/node_modules
+
+    depends_on:
+      - mysql_db
+
+  # ----------------------------------------------------
+  # 3. FRONTEND (React)
+  # ----------------------------------------------------
+  frontend:
+    build:  # Le indica al docker-compose donde se encuentra la aplicación en el cual va a estar trabajando
+      context: ./Frontend/Frontend-TurnosPadel
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173" # <-- Se cambió a 5173 para no chocar con el puerto 3000 del backend
+    volumes:
+      - ./Frontend/Frontend-TurnosPadel:/app
+      - /app/node_modules
+    command: ["npm", "run", "dev:frontend-only", "--", "--host"]
+
+
+    depends_on:
+      - backend
+
+volumes:
+  db_data:
+ 

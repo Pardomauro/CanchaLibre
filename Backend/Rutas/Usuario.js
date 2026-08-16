@@ -1,9 +1,9 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { pool } from '../Config/db.js';
-import { enviarCorreo } from '../Servicios/EmailServicio.js';
-import { generarToken, protegerRuta, verificarRol } from '../Servicios/token.js';
+import { pool } from '../config/db.js';
+import { enviarCorreo } from '../servicios/EmailServicio.js';
+import { generarToken, protegerRuta, verificarRol } from '../servicios/token.js';
 import {
     validarCampos,
     manejarErrorServidor,

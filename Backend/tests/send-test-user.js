@@ -1,5 +1,5 @@
 // Script temporal para enviar un correo de prueba a una dirección dada
-import { enviarCorreo } from '../Servicios/EmailServicio.js';
+import { enviarCorreo } from '../servicios/EmailServicio.js';
 import 'dotenv/config';
 
 const email = process.argv[2];

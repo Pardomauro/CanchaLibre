@@ -1,6 +1,6 @@
 // Script para probar la configuración de email
 import 'dotenv/config';
-import { enviarCorreo } from '../Servicios/EmailServicio.js';
+import { enviarCorreo } from '../servicios/EmailServicio.js';
 
 const probarEmail = async () => {
     console.log('🔍 Probando configuración de email...');

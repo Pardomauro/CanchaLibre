@@ -3,7 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
-import { inicializarDataBase } from './Config/db.js';
+import { inicializarDataBase } from './config/db.js';
 import 'dotenv/config';
 
 const app = express();
@@ -33,10 +33,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(limiter); // Aplicar rate limiting a todas las rutas
 
 // Rutas
-import rutasTurnos from './Rutas/Turnos.js';
-import rutasUsuario from './Rutas/Usuario.js';
-import rutasCanchas from './Rutas/Canchas.js';
-import rutasEstadisticas from './Rutas/Estadisticas.js';
+import rutasTurnos from './rutas/Turnos.js';
+import rutasUsuario from './rutas/Usuario.js';
+import rutasCanchas from './rutas/Canchas.js';
+import rutasEstadisticas from './rutas/Estadisticas.js';
 
 app.use('/api/turnos', rutasTurnos);
 app.use('/api/usuarios', rutasUsuario);

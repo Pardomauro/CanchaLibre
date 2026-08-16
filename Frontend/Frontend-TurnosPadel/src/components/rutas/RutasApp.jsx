@@ -4,18 +4,18 @@ import ProtectedRoute from '../auth/ProtectedRoute';
 import Unauthorized from '../auth/Unauthorized';
 
 // Páginas de usuario
-import Login from '../../pages/usuario/login';
-import Registro from '../../pages/usuario/registro';
+import Login from '../../pages/usuario/Login';
+import Registro from '../../pages/usuario/Registro';
 import RecuperarPassword from '../../pages/usuario/RecuperarPassword';
-import Perfil from '../../pages/usuario/perfil';
-
+import Perfil from '../../pages/usuario/perfil'; 
+ 
 // Páginas de admin
 import AdminDashboard from '../../pages/admin/AdminDashboard';
 import GestionUsuarios from '../../pages/admin/GestionUsuarios';
 
 // Páginas de canchas
-import ListaCanchas from '../../pages/canchas/lista';
-import DetalleCancha from '../../pages/canchas/detalle';
+import ListaCanchas from '../../pages/canchas/Lista';
+import DetalleCancha from '../../pages/canchas/Detalle';
 import CrearEditarCancha from '../../pages/canchas/CrearEditar';
 
 // Páginas de reservas

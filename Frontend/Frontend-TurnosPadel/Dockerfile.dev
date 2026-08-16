@@ -1,0 +1,15 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+
+# Instalar dependencias (incluye devDependencies para desarrollo)
+RUN npm install
+
+# Copiar el resto del código (opcional si usas bind-mount en docker-compose)
+COPY . .
+
+EXPOSE 5173
+
+CMD ["npm", "run", "dev", "--", "--host"]

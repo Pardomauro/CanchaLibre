@@ -1,7 +1,7 @@
 
 import express from 'express';
 import { validationResult } from 'express-validator';
-import { pool } from '../Config/db.js';
+import { pool } from '../config/db.js';
 import {
     validarCampos,
     manejarErrorServidor,

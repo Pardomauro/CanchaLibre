@@ -24,6 +24,30 @@ const createConnection = async () => {
     }
 
 }
+// Espera a que MySQL esté disponible, reintentando la conexión
+const waitForDatabase = async (retries = 15, delayMs = 2000) => {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const temp = await mysql.createConnection({
+                host: dbConfig.host,
+                user: dbConfig.user,
+                password: dbConfig.password
+            });
+            await temp.end();
+            return;
+        } catch (err) {
+            const isRefused = String(err.message || '').includes('ECONNREFUSED');
+            const isAccess = String(err.message || '').includes('Access denied');
+            if (isAccess) {
+                // Credenciales inválidas: no tiene sentido reintentar
+                throw err;
+            }
+            if (i === retries - 1) throw err;
+            console.log(`MySQL no disponible, reintentando en ${delayMs}ms... (${i + 1}/${retries})`);
+            await new Promise(r => setTimeout(r, delayMs));
+        }
+    }
+}
 
 
 // Creamos pool de conexiones para manejar múltiples conexiones de forma eficiente
@@ -40,6 +64,8 @@ const pool = mysql.createPool({
 
 const inicializarDataBase = async () => {
     try {
+        // Esperar a que la base de datos esté lista
+        await waitForDatabase();
         // Crear base de datos si no existe
         const tempConnection = await mysql.createConnection({
             host: dbConfig.host,

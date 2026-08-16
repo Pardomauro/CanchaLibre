@@ -1,6 +1,6 @@
 import express from 'express';
-import { pool } from '../Config/db.js';
-import { protegerRuta, verificarRol } from '../Servicios/token.js';
+import { pool } from '../config/db.js';
+import { protegerRuta, verificarRol } from '../servicios/token.js';
 import { enviarCorreoConfirmacionReserva, formatearFechaReserva } from '../utils/reenvio-confirmacion.js';
 import { enviarCorreoCancelacionReserva } from '../utils/envio-cancelacion.js';
 import {
