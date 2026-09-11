@@ -22,3 +22,6 @@ pnpm-debug.log*
 .DS_Store
 .vscode/
 .idea/
+
+# Local dev compose with secrets
+docker-compose-dev.yml
