@@ -25,3 +25,4 @@ pnpm-debug.log*
 
 # Local dev compose with secrets
 docker-compose-dev.yml
+docker-compose.yml
